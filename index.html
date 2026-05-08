@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AGI BedCare — Interactive Demo</title>
+<title>A Care — Interactive Demo</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;600;700;800&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#080C12;--bg2:#0D1320;--bg3:#111927;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#E8EDF5;--muted:#6B7A96;--accent:#00D4AA;--accent2:#0099FF;--warn:#FFB020;--danger:#FF4757;--ok:#2ED573;--purple:#A78BFA;--mono:'DM Mono',monospace;--sans:'Outfit','Noto Sans Thai',sans-serif;}
@@ -19,26 +19,126 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pok 1.5s infinite;}
 @keyframes pok{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
 #clock{font-family:var(--mono);font-size:13px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .2s;}#clock:hover{background:rgba(255,255,255,.05);color:var(--text);}
-.floor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding-top: 20px; }
-.f-bed { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s; position: relative; }
-.f-bed:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(0,212,170,0.15); }
-.f-bed.d { border-color: rgba(255,71,87,0.4); background: rgba(255,71,87,0.05); }
-.f-bed.d:hover { box-shadow: 0 8px 24px rgba(255,71,87,0.25); border-color: var(--danger); }
-.f-bed.w { border-color: rgba(255,176,32,0.4); background: rgba(255,176,32,0.05); }
-.f-bed.w:hover { box-shadow: 0 8px 24px rgba(255,176,32,0.25); border-color: var(--warn); }
-.fb-num { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.1em; }
-.fb-name { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
-.fb-vitals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--mono); font-size: 13px; }
-.fb-v { display: flex; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); }
-.fb-v span:first-child { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
-.fb-al { margin-top: 14px; font-size: 12px; padding: 8px; border-radius: 8px; text-align: center; font-weight: 600; font-family: var(--sans); }
-.fb-al.d { background: rgba(255,71,87,0.15); color: var(--danger); }
-.fb-al.w { background: rgba(255,176,32,0.15); color: var(--warn); }
-.fb-al.ok { background: rgba(46,213,115,0.15); color: var(--ok); }
-.layout{display:grid;grid-template-columns:220px 1fr 270px;min-height:calc(100vh - 53px);}
+.home-screen{padding:18px 20px;}
+.home-screen .ward-board{max-width:1280px;margin:0 auto 16px;}
+.layout{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:calc(100vh - 53px);}
 .sidebar{border-right:1px solid var(--border);background:var(--bg2);padding:14px 10px;overflow-y:auto;}
-.controls{border-left:1px solid var(--border);background:var(--bg2);padding:14px 14px;overflow-y:auto;}
+.controls{display:none;}
 .main{padding:16px 20px;overflow-y:auto;background:var(--bg);}
+.ward-board{margin-bottom:16px;background:linear-gradient(180deg,rgba(17,25,39,.95),rgba(10,16,25,.98));border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 18px 60px rgba(0,0,0,.25);}
+.ward-board-top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:18px 20px 14px;border-bottom:1px solid var(--border);}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:5px;}
+.ward-board h1{font-size:24px;font-weight:800;letter-spacing:-.4px;margin-bottom:3px;}
+.ward-board p{font-size:12px;color:var(--muted);line-height:1.55;}
+.ward-metrics{display:grid;grid-template-columns:repeat(4,minmax(62px,1fr));gap:8px;min-width:330px;}
+.wm{padding:10px;border:1px solid var(--border);border-radius:9px;background:rgba(255,255,255,.035);text-align:center;}
+.wmv{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1;}
+.wml{font-size:9px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:5px;}
+.wm.ok .wmv{color:var(--ok);}.wm.w .wmv{color:var(--warn);}.wm.d .wmv{color:var(--danger);}
+.ward-scan{display:grid;grid-template-columns:260px 1fr;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.16);}
+.ward-scan-btn{width:100%;min-height:54px;border:1px solid rgba(0,212,170,.42);border-radius:10px;background:linear-gradient(135deg,rgba(0,212,170,.96),rgba(0,153,255,.86));color:#02100d;font-family:var(--sans);font-size:13px;font-weight:900;cursor:pointer;box-shadow:0 16px 36px rgba(0,212,170,.12);transition:transform .16s,filter .16s;}
+.ward-scan-btn:hover{transform:translateY(-1px);filter:brightness(1.08);}
+.ward-scan-output{min-height:54px;border:1px dashed var(--border2);border-radius:10px;background:rgba(255,255,255,.035);padding:10px 12px;}
+.scan-empty{font-size:12px;color:var(--muted);line-height:1.55;}
+.scan-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.scan-title{font-size:11px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.scan-count{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--danger);}
+.abn-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:8px;}
+.abn-link{border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,.045);color:var(--text);font-family:var(--sans);padding:9px 10px;text-align:left;cursor:pointer;transition:transform .15s,border-color .15s,background .15s;}
+.abn-link:hover{transform:translateY(-1px);border-color:var(--accent);background:rgba(0,212,170,.08);}
+.abn-link.d{border-color:rgba(255,71,87,.34);background:rgba(255,71,87,.07);}
+.abn-link.w{border-color:rgba(255,176,32,.32);background:rgba(255,176,32,.06);}
+.abn-bed{font-family:var(--mono);font-size:12px;font-weight:700;margin-bottom:3px;}
+.abn-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.abn-why{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ward-content{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:16px;padding:16px;}
+.ward-map-shell{position:relative;min-height:392px;border:1px solid var(--border);border-radius:11px;background:
+  linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/34px 34px,
+  linear-gradient(0deg,rgba(255,255,255,.018) 1px,transparent 1px) 0 0/34px 34px,
+  rgba(5,10,17,.72);overflow:hidden;}
+.ward-map-label{position:absolute;top:12px;left:14px;font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);z-index:2;}
+.ward-map{height:100%;display:grid;grid-template-columns:1fr 66px 1fr;gap:12px;padding:42px 14px 16px;}
+.ward-wing{display:grid;grid-template-columns:repeat(2,minmax(112px,1fr));gap:11px;}
+.ward-corridor{position:relative;border-left:1px dashed rgba(255,255,255,.14);border-right:1px dashed rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:10px;letter-spacing:.14em;text-transform:uppercase;writing-mode:vertical-rl;}
+.nurse-station{position:absolute;top:16px;left:50%;transform:translateX(-50%);writing-mode:horizontal-tb;letter-spacing:.08em;color:var(--accent);background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.24);border-radius:8px;padding:6px 9px;white-space:nowrap;}
+.bed-node{appearance:none;border:1px solid var(--border2);background:rgba(255,255,255,.045);color:var(--text);border-radius:10px;min-height:104px;padding:10px;display:flex;flex-direction:column;align-items:stretch;gap:7px;cursor:pointer;text-align:left;font-family:var(--sans);transition:transform .18s,border-color .18s,background .18s,box-shadow .18s;}
+.bed-node:hover{transform:translateY(-2px);border-color:rgba(0,212,170,.42);box-shadow:0 12px 28px rgba(0,0,0,.25);}
+.bed-node.active{border-color:var(--accent);background:rgba(0,212,170,.09);box-shadow:0 0 0 1px rgba(0,212,170,.18) inset;}
+.bed-node.d{border-color:rgba(255,71,87,.38);background:rgba(255,71,87,.06);}
+.bed-node.w{border-color:rgba(255,176,32,.32);background:rgba(255,176,32,.055);}
+.bed-node.ok{border-color:rgba(46,213,115,.18);}
+.bed-top{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.bed-id{font-family:var(--mono);font-size:13px;font-weight:600;}
+.bed-status{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.04);}
+.bed-node.ok .bed-status{background:var(--ok);}.bed-node.w .bed-status{background:var(--warn);}.bed-node.d .bed-status{background:var(--danger);animation:pd 1.2s infinite;}
+.bed-shape{height:28px;border-radius:7px;background:linear-gradient(90deg,rgba(255,255,255,.1),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.12);position:relative;overflow:hidden;}
+.bed-shape::before{content:'';position:absolute;left:5px;top:5px;width:20px;height:16px;border-radius:4px;background:rgba(255,255,255,.14);}
+.bed-shape::after{content:'';position:absolute;left:32px;right:6px;top:7px;height:12px;border-radius:8px;background:rgba(0,212,170,.16);}
+.bed-node.w .bed-shape::after{background:rgba(255,176,32,.24);}.bed-node.d .bed-shape::after{background:rgba(255,71,87,.28);}
+.bed-person{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bed-case{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bed-mini{display:flex;justify-content:space-between;gap:5px;font-family:var(--mono);font-size:10px;color:var(--muted);}
+.bed-inspector{border:1px solid var(--border);border-radius:11px;background:rgba(8,12,18,.7);padding:14px;display:flex;flex-direction:column;gap:12px;}
+.ins-k{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+.ins-title{font-size:19px;font-weight:800;line-height:1.15;}
+.ins-sub{font-size:12px;color:var(--muted);line-height:1.5;}
+.ins-case{padding:9px 10px;border-radius:8px;border:1px solid rgba(0,153,255,.22);background:rgba(0,153,255,.07);font-size:12px;line-height:1.45;color:var(--text);}
+.ins-vitals{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ins-v{padding:8px;border-radius:8px;background:rgba(255,255,255,.045);border:1px solid var(--border);}.ins-v span{display:block;font-size:9px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;}.ins-v strong{font-family:var(--mono);font-size:15px;font-weight:600;}
+.ins-actions{display:grid;gap:8px;}
+.agi-calc-btn{width:100%;padding:11px 12px;border:1px solid rgba(0,212,170,.38);border-radius:9px;background:linear-gradient(135deg,rgba(0,212,170,.92),rgba(0,153,255,.82));color:#02100d;font-family:var(--sans);font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 12px 28px rgba(0,212,170,.12);transition:transform .16s,filter .16s;}
+.agi-calc-btn:hover{transform:translateY(-1px);filter:brightness(1.08);}
+.action-output{border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.04);padding:14px 15px;font-size:15px;line-height:1.55;}
+.action-output.d{border-color:rgba(255,71,87,.38);background:rgba(255,71,87,.07);}
+.action-output.w{border-color:rgba(255,176,32,.34);background:rgba(255,176,32,.065);}
+.action-output.ok{border-color:rgba(46,213,115,.25);background:rgba(46,213,115,.06);}
+.action-output.empty{border-style:dashed;color:var(--muted);}
+.ao-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.ao-title{font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.ao-priority{font-family:var(--mono);font-size:13px;font-weight:600;padding:5px 8px;border-radius:6px;background:rgba(255,255,255,.06);}
+.action-output.d .ao-priority{color:var(--danger);background:rgba(255,71,87,.14);}
+.action-output.w .ao-priority{color:var(--warn);background:rgba(255,176,32,.14);}
+.action-output.ok .ao-priority{color:var(--ok);background:rgba(46,213,115,.12);}
+.ao-summary{color:var(--text);font-size:16px;font-weight:700;margin-bottom:12px;}
+.ao-list{display:grid;gap:10px;margin:0;padding:0;list-style:none;}
+.ao-list li{padding:12px 14px;border-radius:9px;background:rgba(0,0,0,.18);border:1px solid rgba(255,255,255,.055);}
+.ao-param{font-family:var(--mono);font-size:14px;color:var(--muted);margin-bottom:6px;}
+.ao-signal-meta{display:flex;gap:8px;flex-wrap:wrap;margin:7px 0 11px;}
+.ao-signal-pill{font-size:13px;color:var(--muted);border:1px solid rgba(255,255,255,.07);border-radius:999px;background:rgba(255,255,255,.035);padding:5px 9px;}
+.ao-action{display:grid;gap:8px;color:var(--text);}
+.ao-action-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:center;width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:rgba(255,255,255,.035);}
+.ao-action-row:hover{border-color:rgba(0,212,170,.22);background:rgba(0,212,170,.045);}
+.ao-num{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(0,212,170,.12);color:var(--accent);font-family:var(--mono);font-size:14px;font-weight:700;flex-shrink:0;}
+.ao-text{min-width:0;font-size:16px;line-height:1.45;}
+.ao-action-metrics{display:flex;gap:6px;justify-content:flex-end;align-items:center;}
+.ao-mini{font-family:var(--mono);font-size:13px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:rgba(255,255,255,.055);padding:4px 7px;color:var(--muted);white-space:nowrap;}
+.ao-mini.conf{color:var(--accent);}
+.ao-mini.cost{color:var(--warn);}
+.ao-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:7px 0 8px;}
+.ao-chip{border:1px solid rgba(255,255,255,.065);border-radius:6px;background:rgba(255,255,255,.035);padding:5px 6px;font-size:10px;color:var(--muted);}
+.ao-chip strong{display:block;font-family:var(--mono);font-size:11px;color:var(--text);margin-top:2px;}
+.ao-chip.conf strong{color:var(--accent);}
+.ao-chip.cost strong{color:var(--warn);}
+.ao-empty-copy{font-size:11px;color:var(--muted);line-height:1.55;}
+.ins-abnormal{border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.035);padding:10px;display:grid;gap:8px;}
+.ins-abnormal-head{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.ins-abnormal-title{font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+.ins-abnormal-count{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--danger);}
+.ins-abnormal-list{display:grid;gap:7px;max-height:310px;overflow:auto;padding-right:2px;}
+.ins-abnormal-list::-webkit-scrollbar{width:3px;}.ins-abnormal-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.ins-abn-link{border:1px solid var(--border2);border-radius:8px;background:rgba(0,0,0,.18);color:var(--text);font-family:var(--sans);padding:8px 9px;text-align:left;cursor:pointer;transition:transform .15s,border-color .15s,background .15s;}
+.ins-abn-link:hover{transform:translateY(-1px);border-color:var(--accent);background:rgba(0,212,170,.07);}
+.ins-abn-link.d{border-color:rgba(255,71,87,.38);background:rgba(255,71,87,.07);}
+.ins-abn-link.w{border-color:rgba(255,176,32,.34);background:rgba(255,176,32,.06);}
+.ins-abn-bed{display:flex;align-items:center;justify-content:space-between;gap:7px;font-family:var(--mono);font-size:11px;font-weight:700;margin-bottom:3px;}
+.ins-abn-priority{font-size:9px;padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.07);}
+.ins-abn-link.d .ins-abn-priority{color:var(--danger);background:rgba(255,71,87,.14);}
+.ins-abn-link.w .ins-abn-priority{color:var(--warn);background:rgba(255,176,32,.14);}
+.ins-abn-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+.ins-abn-why{font-size:10px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.map-legend{display:flex;gap:10px;flex-wrap:wrap;padding:0 16px 16px;font-size:11px;color:var(--muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:5px;}.legend-dot.ok{background:var(--ok);}.legend-dot.w{background:var(--warn);}.legend-dot.d{background:var(--danger);}
+.detail-anchor{scroll-margin-top:70px;}
 .sl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 6px;margin:14px 0 6px;cursor:pointer;transition:color .2s;}.sl:hover{color:var(--accent);}
 .sl:first-child{margin-top:0;}
 .pcard{padding:9px 10px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;margin-bottom:5px;transition:all .2s;position:relative;}
@@ -49,6 +149,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 @keyframes bp{0%,100%{border-color:rgba(255,71,87,.4);}50%{border-color:rgba(255,71,87,.9);}}
 .pname{font-size:13px;font-weight:600;margin-bottom:2px;}
 .page{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.puse{font-size:10px;color:var(--muted);margin:-2px 0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .pmini{display:flex;gap:6px;flex-wrap:wrap;}
 .mv{font-family:var(--mono);font-size:10px;padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.05);}
 .mv.ok{color:var(--ok);}.mv.w{color:var(--warn);}.mv.d{color:var(--danger);}
@@ -176,25 +277,55 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
 .toast{position:fixed;top:64px;right:18px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px 16px;font-size:12px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(0,0,0,.45);transform:translateX(115%);transition:transform .3s;z-index:500;max-width:300px;}
 .toast.show{transform:translateX(0);}
 .toast.ok-t{border-color:rgba(46,213,115,.4);}.toast.warn-t{border-color:rgba(255,176,32,.4);}.toast.danger-t{border-color:rgba(255,71,87,.4);}
-@media(max-width:1000px){.layout{grid-template-columns:1fr;}.sidebar,.controls{display:none;}.vgrid{grid-template-columns:repeat(2,1fr);}.sgrid{grid-template-columns:1fr;}}
+@media(max-width:1000px){.layout{grid-template-columns:1fr;}.sidebar,.controls{display:none;}.vgrid{grid-template-columns:repeat(2,1fr);}.sgrid{grid-template-columns:1fr;}.ward-content{grid-template-columns:1fr;}.ward-metrics{min-width:0;grid-template-columns:repeat(2,1fr);}.ward-board-top{flex-direction:column;}.ward-map{grid-template-columns:1fr;}.ward-corridor{min-height:52px;writing-mode:horizontal-tb;}.nurse-station{top:50%;}.ward-wing{grid-template-columns:repeat(2,minmax(120px,1fr));}}
+@media(max-width:760px){.ward-scan{grid-template-columns:1fr;}}
+@media(max-width:620px){.main{padding:12px;}.ward-wing{grid-template-columns:1fr;}.ward-content{padding:12px;}.ward-map{padding:38px 10px 12px;}.vgrid{grid-template-columns:1fr;}.phead{flex-direction:column;}.risk-row{width:100%;}.rb{flex:1;}.ward-board h1{font-size:21px;}}
 </style>
 </head>
 <body>
 <header>
-  <div class="logo" onclick="location.reload()"><div class="logo-icon">🧠</div><div class="logo-text">AGI <span>BedCare</span></div></div>
+  <div class="logo" onclick="goHome()"><div class="logo-icon">🧠</div><div class="logo-text">A <span>Bed</span></div></div>
   <div class="hdr-right">
     <div class="live-badge" onclick="toast('System Status: All systems operational','ok')"><div class="live-dot"></div>LIVE</div>
     <div id="clock" onclick="toggleClock()">--:--:--</div>
-    <div style="font-size:11px;color:var(--muted);padding:3px 9px;border:1px solid var(--border);border-radius:5px;cursor:pointer;" onclick="toast('Ward 7B Summary: 12 Patients, 1 Critical','info')">Ward 7B · ICU Step-Down</div>
+    <div id="wardBadge" style="font-size:11px;color:var(--muted);padding:3px 9px;border:1px solid var(--border);border-radius:5px;cursor:pointer;" onclick="toastWardSummary()">Ward 7B · ICU Step-Down</div>
   </div>
 </header>
 
-<div id="mapView" style="padding: 24px;">
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">🗺️ Ward 7B Floor Plan <span style="font-size:12px; padding: 4px 10px; background: rgba(46,213,115,0.1); color: var(--ok); border-radius: 20px; font-weight: 600;">LIVE AGI MONITORING</span></div>
-    <div style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">คลิกที่เตียงผู้ป่วยเพื่อดู Dashboard และแบบจำลองสถานการณ์ต่างๆ (6 Use Cases)</div>
-    <div class="floor-grid" id="floorGrid"></div>
-  </div>
+<div id="mapView" class="home-screen">
+  <section class="ward-board">
+    <div class="ward-board-top">
+      <div>
+        <div class="eyebrow">Ward 7B · Smart Bed Floor Plan</div>
+        <h1>แผนผังเตียงผู้ป่วยแบบ Real-time</h1>
+        <p>คลิกเตียงในแผนผังเพื่อเข้าไปดูค่า vital signs, pressure injury, fall risk, AGI recommendations และสถานการณ์จำลองของเตียงนั้น</p>
+      </div>
+      <div class="ward-metrics">
+        <div class="wm"><div class="wmv" id="homeTotal">12</div><div class="wml">Beds</div></div>
+        <div class="wm d"><div class="wmv" id="homeCritical">0</div><div class="wml">Critical</div></div>
+        <div class="wm w"><div class="wmv" id="homeWarning">0</div><div class="wml">Warning</div></div>
+        <div class="wm ok"><div class="wmv" id="homeStable">0</div><div class="wml">Stable</div></div>
+      </div>
+    </div>
+    <div class="ward-scan">
+      <button class="ward-scan-btn" onclick="runWardAgiScan()">AGI คำนวณหาเตียง Abnormal</button>
+      <div class="ward-scan-output" id="wardScanOutput">
+        <div class="scan-empty">กดปุ่มเพื่อให้ AGI สแกนทั้งวอร์ด แล้วสร้างลิงก์ไปยังเตียงที่ผิดปกติ</div>
+      </div>
+    </div>
+    <div class="ward-content">
+      <div class="ward-map-shell">
+        <div class="ward-map-label">ICU Step-Down · North Wing</div>
+        <div class="ward-map" id="wardMap"></div>
+      </div>
+      <aside class="bed-inspector" id="bedInspector"></aside>
+    </div>
+    <div class="map-legend">
+      <span><i class="legend-dot d"></i>Critical ต้องดูทันที</span>
+      <span><i class="legend-dot w"></i>Warning ต้องติดตาม</span>
+      <span><i class="legend-dot ok"></i>Stable อยู่ในช่วงเป้าหมาย</span>
+    </div>
+  </section>
 </div>
 
 <div id="detailView" style="display: none;">
@@ -209,10 +340,10 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
   <div id="sidebarList"></div>
   <div class="sl">สรุปวอร์ด</div>
   <div style="padding:0 4px;font-size:12px;">
-    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--muted)">ทั้งหมด</span><span style="font-family:var(--mono);">12</span></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--danger)">⚠ Critical</span><span style="font-family:var(--mono);color:var(--danger);">1</span></div>
-    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--warn)">⚡ Warning</span><span style="font-family:var(--mono);color:var(--warn);">3</span></div>
-    <div style="display:flex;justify-content:space-between;"><span style="color:var(--ok)">✓ Stable</span><span style="font-family:var(--mono);color:var(--ok);">8</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--muted)">ทั้งหมด</span><span style="font-family:var(--mono);" id="sumTotal">12</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--danger)">⚠ Critical</span><span style="font-family:var(--mono);color:var(--danger);" id="sumCritical">0</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--warn)">⚡ Warning</span><span style="font-family:var(--mono);color:var(--warn);" id="sumWarning">0</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--ok)">✓ Stable</span><span style="font-family:var(--mono);color:var(--ok);" id="sumStable">0</span></div>
   </div>
   <div class="sl" style="margin-top:16px;">AGI Action Log</div>
   <div class="logbox" id="logbox">
@@ -236,6 +367,11 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
       <div class="rb med" id="news2Rb"><div class="rs" id="news2Score">4</div><div class="rl">NEWS2</div></div>
       <div class="rb low" id="sepsisRb"><div class="rs" style="color:var(--ok);font-size:15px;" id="sepsisRs">Low</div><div class="rl">Sepsis</div></div>
     </div>
+  </div>
+
+  <div class="panel" id="detailActionPanel" style="margin-bottom:13px;">
+    <div class="ph"><div class="pt">🧠 AGI Action Output ของเตียงนี้</div><div style="font-size:10px;color:var(--muted);">confidence · target · direction · cost</div></div>
+    <div class="pb" id="detailActionOutput"></div>
   </div>
 
   <div class="wave-wrap"><canvas class="ecg" id="ecgC"></canvas><div class="wlabel">ECG · Lead II</div><div class="wval" id="ecgHR">92 bpm</div></div>
@@ -336,13 +472,8 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
   </div>
 
   <div class="ctrl-group">
-    <div class="cgt">⚡ จำลองสถานการณ์</div>
-    <button class="scenario-btn" onclick="scenario('sepsis')">🦠 Sepsis Early Warning</button>
-    <button class="scenario-btn" onclick="scenario('spo2drop')">😮‍💨 SpO₂ Drop (COPD)</button>
-    <button class="scenario-btn" onclick="scenario('htn')">🩺 Hypertensive Crisis</button>
-    <button class="scenario-btn" onclick="scenario('pressure')">⚠️ Pressure Injury Risk</button>
-    <button class="scenario-btn" onclick="scenario('fall')">🚨 Bed Exit / Fall Risk</button>
-    <button class="scenario-btn" onclick="scenario('stable')">✅ Reset — All Normal</button>
+    <div class="cgt">⚡ Use Case Library</div>
+    <div id="scenarioList"></div>
   </div>
 </div>
 </div>
@@ -366,17 +497,44 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
 <div class="toast" id="toast"><span id="toastText">Done</span></div>
 
 <script>
+const USE_CASES = [
+  {key:'stable',icon:'✅',title:'Stable Monitoring',button:'Stable / Normal',status:'ok',msg:'✅ Normal',summary:'เฝ้าระวังค่าปกติและ baseline เฉพาะบุคคล',values:{hr:72,spo2:97,bp:122,dia:78,temp:36.7,rr:16,pain:1,urine:.8,pos:'supine',angle:20,posSec:900,fallRisk:false}},
+  {key:'sepsis',icon:'🦠',title:'Sepsis Early Warning',button:'Sepsis Early Warning',status:'d',msg:'🦠 Sepsis Risk',summary:'ไข้สูงร่วมกับ HR สูงกว่า baseline ต้อง screen sepsis',values:{hr:116,spo2:96,bp:124,dia:76,temp:38.8,rr:18,pain:2,urine:.7,pos:'supine',angle:25,posSec:1200,fallRisk:false}},
+  {key:'spo2drop',icon:'😮‍💨',title:'COPD SpO₂ Drop',button:'SpO₂ Drop / COPD',status:'d',msg:'😮‍💨 SpO₂ Drop',summary:'SpO₂ ต่ำกว่า target และ RR เร็วขึ้น ต้องประเมิน oxygen support',values:{hr:88,spo2:85,bp:128,dia:78,temp:36.9,rr:26,pain:2,urine:.7,pos:'right',angle:35,posSec:2400,fallRisk:false}},
+  {key:'htn',icon:'🩺',title:'Hypertensive Crisis',button:'Hypertensive Crisis',status:'d',msg:'🩺 HTN Crisis',summary:'Systolic BP > 180 เสี่ยง stroke และ end-organ damage',values:{hr:86,spo2:96,bp:196,dia:112,temp:36.8,rr:18,pain:2,urine:.7,pos:'supine',angle:25,posSec:1100,fallRisk:false}},
+  {key:'pressure',icon:'⚠️',title:'Pressure Injury Risk',button:'Pressure Injury Risk',status:'w',msg:'⚠️ Position 2h+',summary:'ท่าเดิมนานเกิน threshold ต้องพิจารณาพลิกตัวและลดแรงกด',values:{hr:82,spo2:96,bp:126,dia:76,temp:36.8,rr:18,pain:2,urine:.7,pos:'right',angle:25,posSec:7600,fallRisk:false}},
+  {key:'fall',icon:'🚨',title:'Bed Exit / Fall Risk',button:'Bed Exit / Fall Risk',status:'d',msg:'🚨 Bed Exit Alert',summary:'ตรวจพบความเสี่ยงลุกจากเตียงร่วมกับ pain spike',values:{hr:88,spo2:96,bp:128,dia:78,temp:36.8,rr:18,pain:5,urine:.7,pos:'supine',angle:10,posSec:500,fallRisk:true}},
+  {key:'shock',icon:'💉',title:'Hypotension / Shock',button:'Hypotension / Shock',status:'d',msg:'💉 Shock Risk',summary:'BP ต่ำร่วมกับ urine output ต่ำ เสี่ยง hypoperfusion',values:{hr:96,spo2:95,bp:74,dia:44,temp:36.9,rr:20,pain:2,urine:.22,pos:'supine',angle:15,posSec:700,fallRisk:false}},
+  {key:'brady',icon:'💔',title:'Severe Bradycardia',button:'Severe Bradycardia',status:'d',msg:'💔 Bradycardia',summary:'HR ต่ำกว่า 40 bpm ต้องประเมิน cardiac instability',values:{hr:36,spo2:96,bp:116,dia:68,temp:36.4,rr:12,pain:1,urine:.7,pos:'supine',angle:20,posSec:1200,fallRisk:false}},
+  {key:'arrhythmia',icon:'📈',title:'Tachyarrhythmia Alert',button:'Tachyarrhythmia',status:'d',msg:'📈 HR 140+',summary:'HR สูงมาก ต้องทำ 12-lead ECG และหา cause',values:{hr:146,spo2:96,bp:132,dia:82,temp:36.9,rr:20,pain:2,urine:.7,pos:'supine',angle:20,posSec:1000,fallRisk:false}},
+  {key:'fever',icon:'🌡️',title:'High Fever / Hyperthermia',button:'High Fever',status:'d',msg:'🌡️ High Fever',summary:'อุณหภูมิสูงกว่า 39°C ต้องจัดการไข้และหาสาเหตุ',values:{hr:96,spo2:96,bp:126,dia:78,temp:39.4,rr:18,pain:2,urine:.7,pos:'left',angle:25,posSec:2100,fallRisk:false}},
+  {key:'lowurine',icon:'💧',title:'Low Urine Output / AKI',button:'Low Urine Output',status:'d',msg:'💧 Low Urine',summary:'Urine output ต่ำกว่า 0.3 ml/kg/hr เสี่ยง AKI หรือ hypoperfusion',values:{hr:86,spo2:96,bp:104,dia:66,temp:36.8,rr:18,pain:2,urine:.18,pos:'supine',angle:20,posSec:2600,fallRisk:false}},
+  {key:'pain',icon:'😣',title:'Severe Pain Detection',button:'Severe Pain',status:'d',msg:'😣 Pain 9/10',summary:'AI ตรวจพบ pain score สูงจาก micro-expression',values:{hr:96,spo2:96,bp:132,dia:82,temp:36.8,rr:18,pain:9,urine:.7,pos:'left',angle:25,posSec:1700,fallRisk:false}}
+];
+const scenarios={};USE_CASES.forEach(u=>{scenarios[u.key]=u;});
+function makePatient(base,key,overrides={}){
+  const uc=scenarios[key];
+  return {...base,scenario:key,st:uc.status,msg:uc.msg,caseTitle:uc.title,caseSummary:uc.summary,...uc.values,...overrides};
+}
 const PATIENTS = [
-  { name: 'นาย สมชาย ใจดี', hn: '2024-07743', bed: '7B-01', adm: '4 พ.ค. 2026', tags: ['Observation', 'Stable'], braden: 18, news2: 0, sepsis: 'Low', scenario: 'stable', st: 'ok', msg: '✅ Normal', hr: 72, spo2: 98, bp: '120/80', temp: 36.8 },
-  { name: 'นาง มาลี สวัสดี', hn: '2024-08112', bed: '7B-02', adm: '6 พ.ค. 2026', tags: ['Infection', 'ICU Step-Down'], braden: 14, news2: 7, sepsis: 'High', scenario: 'sepsis', st: 'd', msg: '🦠 Sepsis Risk', hr: 118, spo2: 91, bp: '92/50', temp: 38.8 },
-  { name: 'นาย วิชัย ศรีสุข', hn: '2024-09221', bed: '7B-03', adm: '7 พ.ค. 2026', tags: ['COPD', 'Oxygen Therapy'], braden: 15, news2: 4, sepsis: 'Low', scenario: 'spo2drop', st: 'd', msg: '😮‍💨 SpO₂ Drop', hr: 96, spo2: 85, bp: '148/90', temp: 37.0 },
-  { name: 'นาง สมหญิง รักดี', hn: '2024-10045', bed: '7B-04', adm: '8 พ.ค. 2026', tags: ['Hypertension', 'Stroke Risk'], braden: 16, news2: 5, sepsis: 'Low', scenario: 'htn', st: 'd', msg: '🩺 HTN Crisis', hr: 82, spo2: 92, bp: '195/110', temp: 37.2 },
-  { name: 'นาย ประเสริฐ ยืนยง', hn: '2024-11234', bed: '7B-05', adm: '1 พ.ค. 2026', tags: ['Immobile', 'Stroke'], braden: 9, news2: 2, sepsis: 'Low', scenario: 'pressure', st: 'w', msg: '⚠️ Position 2h+', hr: 80, spo2: 95, bp: '130/80', temp: 37.1 },
-  { name: 'นางสาว ดวงใจ สุขุม', hn: '2024-12888', bed: '7B-06', adm: '8 พ.ค. 2026', tags: ['Dementia', 'Fall Risk'], braden: 17, news2: 1, sepsis: 'Low', scenario: 'fall', st: 'd', msg: '🚨 Bed Exit Alert', hr: 108, spo2: 93, bp: '145/85', temp: 36.9 }
+  makePatient({name:'นาย สมชาย ใจดี',age:74,hn:'2024-07743',bed:'7B-01',adm:'4 พ.ค. 2026',tags:['Observation','Stable','Ward 7B'],braden:18,news2:0,sepsis:'Low'},'stable'),
+  makePatient({name:'นาง มาลี สวัสดี',age:81,hn:'2024-08112',bed:'7B-02',adm:'6 พ.ค. 2026',tags:['Infection','Type 2 Diabetes','ICU Step-Down'],braden:14,news2:7,sepsis:'High'},'sepsis'),
+  makePatient({name:'นาย วิชัย ศรีสุข',age:68,hn:'2024-09221',bed:'7B-03',adm:'7 พ.ค. 2026',tags:['COPD Stage III','Oxygen Therapy','Step-Down ICU'],braden:15,news2:4,sepsis:'Low'},'spo2drop'),
+  makePatient({name:'นาง สมหญิง รักดี',age:72,hn:'2024-10045',bed:'7B-04',adm:'8 พ.ค. 2026',tags:['Hypertension','Stroke Risk','Telemetry'],braden:16,news2:5,sepsis:'Low'},'htn'),
+  makePatient({name:'นาย ประเสริฐ ยืนยง',age:79,hn:'2024-11234',bed:'7B-05',adm:'1 พ.ค. 2026',tags:['Stroke','Immobile','Pressure Risk'],braden:9,news2:2,sepsis:'Low'},'pressure'),
+  makePatient({name:'นางสาว ดวงใจ สุขุม',age:66,hn:'2024-12888',bed:'7B-06',adm:'8 พ.ค. 2026',tags:['Dementia','Fall Risk','Bed Sensor'],braden:17,news2:1,sepsis:'Low'},'fall'),
+  makePatient({name:'นาย กิตติศักดิ์ พูลผล',age:70,hn:'2024-13002',bed:'7B-07',adm:'8 พ.ค. 2026',tags:['Septic Shock Watch','Fluid Balance','ICU Step-Down'],braden:12,news2:8,sepsis:'High'},'shock'),
+  makePatient({name:'นาง อรทัย แสงทอง',age:77,hn:'2024-13018',bed:'7B-08',adm:'5 พ.ค. 2026',tags:['Bradycardia','Cardiac Monitor','Telemetry'],braden:16,news2:5,sepsis:'Low'},'brady'),
+  makePatient({name:'นาย อนันต์ สุวรรณ',age:63,hn:'2024-13027',bed:'7B-09',adm:'7 พ.ค. 2026',tags:['Arrhythmia','ECG Watch','Cardiology'],braden:17,news2:6,sepsis:'Low'},'arrhythmia'),
+  makePatient({name:'นาง ศิริพร เมตตา',age:69,hn:'2024-13044',bed:'7B-10',adm:'8 พ.ค. 2026',tags:['Fever','Infection Workup','Ward 7B'],braden:15,news2:4,sepsis:'Med'},'fever'),
+  makePatient({name:'นาย ชัยวัฒน์ ธารา',age:76,hn:'2024-13059',bed:'7B-11',adm:'6 พ.ค. 2026',tags:['AKI Watch','Fluid Balance','Urine Sensor'],braden:13,news2:5,sepsis:'Med'},'lowurine'),
+  makePatient({name:'นาง ลัดดา บุญมี',age:58,hn:'2024-13076',bed:'7B-12',adm:'8 พ.ค. 2026',tags:['Post-Op','Pain Control','Recovery'],braden:18,news2:3,sepsis:'Low'},'pain')
 ];
 
-let S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false,_h24:true};
+let S={hr:92,spo2:91,bp:155,dia:90,temp:37.1,rr:19,pain:2,urine:.6,pos:'right',angle:25,posSec:6135,fallRisk:false,_pa:null,_pressAlerted:false,_h24:true};
 const BL={hr:68,spo2:90,bp:150,temp:36.6,rr:20};
+let activeActionIndex=null;
+let wardScanReady=false;
 
 // Clock (removed old interval here)
 
@@ -387,6 +545,7 @@ setInterval(()=>{
   const h=Math.floor(S.posSec/3600),m=Math.floor((S.posSec%3600)/60),s=S.posSec%60;
   document.getElementById('posTimer').textContent=`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
   document.getElementById('vPos').textContent=`${h}h ${m}m`;
+  if(currentIndex!==null&&S.posSec%30===0)syncCurrentPatient();
   if(S.posSec>7200&&!S._pressAlerted){S._pressAlerted=true;addLog('warn','⚠ Position 2h exceeded — reposition needed');toast('⚠ AGI: ถึงเวลาพลิกตัว','warn');checkAGI();}
 },1000);
 
@@ -459,17 +618,25 @@ function renderVital(k,v){
   const st=getStatus(k,v);
   const vc=document.getElementById(`vc_${k}`);if(vc)vc.className=`vc ${st}`;
   const ve=document.getElementById(valIds[k]);
-  if(ve){if(k==='temp')ve.textContent=v.toFixed(1);else if(k==='bp')ve.innerHTML=`${v}<span style="font-size:15px">/90</span>`;else ve.textContent=Math.round(v);}
+  if(ve){if(k==='temp')ve.textContent=v.toFixed(1);else if(k==='bp')ve.innerHTML=`${Math.round(v)}<span style="font-size:15px">/${S.dia||90}</span>`;else ve.textContent=Math.round(v);}
   const le=document.getElementById(labelIds[k]);
   if(le){le.textContent=`${k==='temp'?v.toFixed(1):Math.round(v)} ${unitsMap[k]}`;le.className=st;}
   const se=document.getElementById(sliderIds[k]);
   if(se)se.className=st==='d'?'danger-s':st==='w'?'warn-s':'';
+}
+function renderUrine(v){
+  const st=v<.3?'d':v<.5?'w':'ok';
+  const vc=document.getElementById('vc_urine');if(vc)vc.className=`vc ${st}`;
+  const val=document.getElementById('vUrine');if(val)val.textContent=v.toFixed(v<1?2:1).replace(/0$/,'').replace(/\.$/,'');
+  const base=vc?vc.querySelector('.vbase'):null;
+  if(base)base.innerHTML=v<.3?'<span class="bdiff up">⚠ AKI risk</span> ต่ำกว่า 0.3':v<.5?'<span class="bdiff dn">เฝ้าระวัง</span> ต่ำกว่า target':'<span class="bdiff nm">✓ adequate</span>';
 }
 
 function uv(k,raw){
   let v=parseFloat(raw);if(k==='temp')v=v/10;
   S[k]=v;renderVital(k,v);
   if(k==='hr')document.getElementById('ecgHR').textContent=`${Math.round(v)} bpm`;
+  syncCurrentPatient();
   checkAGI();
 }
 
@@ -489,6 +656,7 @@ function chgPos(p,el){
   document.getElementById('posLabel').textContent=`${c.lbl} · ${S.angle}°`;
   addLog('info',`เปลี่ยนท่า: ${c.lbl}`);
   toast(`🛏️ ท่าใหม่: ${c.lbl}`,'ok');
+  syncCurrentPatient();
   checkAGI();
 }
 function chgAngle(v){
@@ -496,6 +664,7 @@ function chgAngle(v){
   document.getElementById('lAngle').textContent=`${v}°`;
   document.getElementById('angleLabel').textContent=`${v}°`;
   document.getElementById('posLabel').textContent=`${posC[S.pos].lbl} · ${v}°`;
+  syncCurrentPatient();
 }
 
 // AGI CHECK
@@ -515,6 +684,9 @@ function checkAGI(){
   if(rr<8||rr>30)alerts.push({t:'d',icon:'💨',title:`Respiratory ${rr<8?'Failure':'Distress'}`,desc:`RR ${rr}/min · ${rr<8?'น้อยเกิน = CO2 คั่ง':'มากเกิน = ต้องการ oxygen support'}`,action:'ประเมิน airway + O₂ mask',key:'rr'});
   if(pain>=7)alerts.push({t:'d',icon:'😣',title:`Pain Score ${pain}/10 — รุนแรง`,desc:'Micro-expression AI ตรวจพบความเจ็บปวดรุนแรง · ผู้ป่วยอาจสื่อสารไม่ได้',action:'Morphine 2mg IV PRN',key:'pain'});
   else if(pain>=4)alerts.push({t:'w',icon:'😣',title:`Pain Score ${pain}/10`,desc:'ความเจ็บปวดระดับกลาง · พิจารณา analgesic',action:null,key:'painw'});
+  if(S.urine<.3)alerts.push({t:'d',icon:'💧',title:`Urine Output ${S.urine.toFixed(2)} ml/kg/hr — ต่ำวิกฤต`,desc:'ต่ำกว่า 0.3 ml/kg/hr · เสี่ยง AKI / hypoperfusion · ต้องประเมิน fluid balance',action:'ประเมิน I/O + แจ้งแพทย์',key:'urine'});
+  else if(S.urine<.5)alerts.push({t:'w',icon:'💧',title:`Urine Output ${S.urine.toFixed(2)} ml/kg/hr`,desc:'ต่ำกว่า target 0.5 ml/kg/hr · ติดตามต่อเนื่อง',action:null,key:'urinew'});
+  if(S.fallRisk)alerts.push({t:'d',icon:'🚨',title:'Bed Exit / Fall Risk Active',desc:'เตียงตรวจพบ pattern การลุกจากเตียงหรือการเคลื่อนตัวผิดปกติ · ต้องให้พยาบาลตรวจทันที',action:'เรียกพยาบาล + เปิด side rail',key:'fall'});
   if((pos==='right'||pos==='left')&&S.posSec>5400)alerts.push({t:'w',icon:'🛏️',title:'แรงกดสะสม — ควรพลิกตัว',desc:`นอน ${posC[pos].lbl} ${Math.floor(S.posSec/60)} นาที · เสี่ยง Pressure Injury Grade I บริเวณกระดูกก้นกบ`,action:'ปรับท่านอน (motor bed)',key:'repos'});
   if(alerts.length===0)alerts.push({t:'ok-a',icon:'✅',title:'ทุก Parameter อยู่ใน target range',desc:`AGI ตรวจสอบ 12 parameters · Personal baseline tracking active · ไม่พบความผิดปกติ`,action:null,key:'ok'});
   renderAlerts(alerts);updateAGIStatus(alerts);updateRiskScores();
@@ -554,38 +726,41 @@ function updateRiskScores(){
 }
 
 // Scenarios
-const scenarios={
-  sepsis:{hr:118,spo2:91,bp:92,temp:38.8,rr:26,pain:6,msg:'🦠 Sepsis — HR↑ Temp↑ BP↓ RR↑'},
-  spo2drop:{hr:96,spo2:85,bp:148,temp:37.0,rr:28,pain:3,msg:'😮‍💨 SpO₂ Drop 85% — COPD exacerbation'},
-  htn:{hr:82,spo2:92,bp:195,temp:37.2,rr:18,pain:4,msg:'🩺 Hypertensive Crisis — BP 195 mmHg'},
-  pressure:{hr:80,spo2:95,bp:130,temp:37.1,rr:18,pain:2,posSec:7300,msg:'⚠️ Pressure zone — 2h exceeded'},
-  fall:{hr:108,spo2:93,bp:145,temp:36.9,rr:20,pain:7,msg:'🚨 Bed exit + fall risk + pain spike'},
-  stable:{hr:72,spo2:98,bp:120,temp:36.8,rr:16,pain:1,msg:'✅ All vitals normalized — stable'}
-};
 let currentPatient = null;
+let currentIndex = null;
 
 function scenario(name){
   const sc=scenarios[name];if(!sc)return;
-  Object.assign(S,{hr:sc.hr,spo2:sc.spo2,bp:sc.bp,temp:sc.temp,rr:sc.rr,pain:sc.pain});
-  if(sc.posSec)S.posSec=sc.posSec; else S.posSec=600;
-  document.getElementById('sHR').value=sc.hr;
-  document.getElementById('sSpo2').value=sc.spo2;
-  document.getElementById('sBP').value=sc.bp;
-  document.getElementById('sTemp').value=Math.round(sc.temp*10);
-  document.getElementById('sRR').value=sc.rr;
-  document.getElementById('sPain').value=sc.pain;
+  Object.assign(S,sc.values);
+  document.getElementById('sHR').value=S.hr;
+  document.getElementById('sSpo2').value=S.spo2;
+  document.getElementById('sBP').value=S.bp;
+  document.getElementById('sTemp').value=Math.round(S.temp*10);
+  document.getElementById('sRR').value=S.rr;
+  document.getElementById('sPain').value=S.pain;
+  document.getElementById('sAngle').value=S.angle;
+  document.getElementById('lAngle').textContent=`${S.angle}°`;
   ['hr','spo2','bp','temp','rr','pain'].forEach(k=>renderVital(k,S[k]));
-  document.getElementById('ecgHR').textContent=`${sc.hr} bpm`;
+  renderUrine(S.urine);
+  setPositionUI(S.pos);
+  document.getElementById('ecgHR').textContent=`${S.hr} bpm`;
+  if(currentIndex!==null){
+    Object.assign(PATIENTS[currentIndex],sc.values,{scenario:name,st:sc.status,msg:sc.msg,caseTitle:sc.title,caseSummary:sc.summary});
+    currentPatient=PATIENTS[currentIndex];
+    renderSidebar();
+    renderBedInspector(currentIndex);
+    renderDetailActionOutput(currentIndex);
+  }
   checkAGI();
-  addLog(name==='stable'?'ok':'warn',sc.msg);
-  toast(sc.msg,name==='stable'?'ok':'warn');
+  addLog(name==='stable'?'ok':'warn',`${sc.icon} ${sc.title}`);
+  toast(`${sc.icon} ${sc.title}`,name==='stable'?'ok':'warn');
 }
 
 // Modal
 function openModal(key,icon,title,action){
   S._pa={key,action};
   document.getElementById('mIcon').textContent=icon;
-  document.getElementById('mDetail').innerHTML=`<strong>Action:</strong> ${action}<br><strong>Patient:</strong> ${currentPatient?currentPatient.name:''}<br><strong>HR:</strong> ${Math.round(S.hr)} bpm · <strong>SpO₂:</strong> ${S.spo2}% · <strong>BP:</strong> ${S.bp} mmHg · <strong>Temp:</strong> ${S.temp.toFixed(1)}°C<br><strong>Detected by:</strong> AGI personal baseline deviation engine<br><strong>Execution:</strong> Device จะดำเนินการอัตโนมัติหลัง approve`;
+  document.getElementById('mDetail').innerHTML=`<strong>Action:</strong> ${action}<br><strong>Patient:</strong> ${currentPatient?currentPatient.name:''}<br><strong>HR:</strong> ${Math.round(S.hr)} bpm · <strong>SpO₂:</strong> ${S.spo2}% · <strong>BP:</strong> ${S.bp}/${S.dia||90} mmHg · <strong>Temp:</strong> ${S.temp.toFixed(1)}°C<br><strong>Detected by:</strong> AGI personal baseline deviation engine<br><strong>Execution:</strong> Device จะดำเนินการอัตโนมัติหลัง approve`;
   document.getElementById('modal').classList.add('show');
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
@@ -596,6 +771,9 @@ function doApprove(){
   if(a.key==='o2'){S.spo2=Math.min(94,S.spo2+3);renderVital('spo2',S.spo2);document.getElementById('sSpo2').value=S.spo2;}
   if(a.key==='repos'){chgPos('supine',document.querySelector('.pos-btn'));}
   if(a.key==='sepsis'){S.temp=Math.max(37.5,S.temp-.5);renderVital('temp',S.temp);document.getElementById('sTemp').value=Math.round(S.temp*10);}
+  if(a.key==='urine'){S.urine=.5;renderUrine(S.urine);}
+  if(a.key==='fall'){S.fallRisk=false;}
+  syncCurrentPatient();
   checkAGI();
 }
 
@@ -618,71 +796,291 @@ function toast(msg,type='ok'){
 }
 
 // Map & Navigation
-function renderMap() {
-  document.getElementById('floorGrid').innerHTML = PATIENTS.map((p, i) => `
-    <div class="f-bed ${p.st}" onclick="openPatient(${i})">
-       <div class="fb-num">เตียง ${p.bed}</div>
-       <div class="fb-name">${p.name}</div>
-       <div class="fb-vitals">
-         <div class="fb-v"><span>HR</span><span class="${p.st==='d'&&p.hr>100?'d':''}">${p.hr}</span></div>
-         <div class="fb-v"><span>SpO₂</span><span class="${p.spo2<90?'d':''}">${p.spo2}%</span></div>
-         <div class="fb-v"><span>BP</span><span class="${p.scenario==='htn'||p.scenario==='sepsis'?'d':''}">${p.bp}</span></div>
-         <div class="fb-v"><span>Temp</span><span class="${p.temp>38?'d':''}">${p.temp}°C</span></div>
-       </div>
-       <div class="fb-al ${p.st}">${p.msg}</div>
-    </div>
-  `).join('');
-  
-  document.getElementById('sidebarList').innerHTML = PATIENTS.map((p, i) => `
-    <div class="pcard ${p.st==='d'?'danger-c':p.st==='w'?'warn-c':''}" id="sb_p_${i}" onclick="switchP(${i})">
-       <div class="sdot ${p.st}"></div>
-       <div class="pname">${p.name}</div>
-       <div class="page">${p.bed}</div>
-       <div class="pmini"><span class="mv ${p.st==='d'&&p.hr>100?'d':''}">HR ${p.hr}</span><span class="mv ${p.spo2<90?'d':''}">SpO₂ ${p.spo2}%</span></div>
-    </div>
-  `).join('');
+function bedNo(p){return parseInt(String(p.bed).split('-')[1],10)||0;}
+function statusForState(src){
+  const statuses=['hr','spo2','bp','temp','rr','pain'].map(k=>getStatus(k,src[k]));
+  const caseStatus=src.scenario&&scenarios[src.scenario]?scenarios[src.scenario].status:null;
+  if(caseStatus==='d'||statuses.includes('d')||src.urine<.3||src.fallRisk)return'd';
+  if(caseStatus==='w'||statuses.includes('w')||src.urine<.5||src.posSec>5400)return'w';
+  return'ok';
 }
-
-function openPatient(i) {
-  document.getElementById('mapView').style.display = 'none';
-  document.getElementById('detailView').style.display = 'block';
-  document.getElementById('dBedName').textContent = `กำลังดูข้อมูล: เตียง ${PATIENTS[i].bed}`;
+function wardCounts(){
+  const c={total:PATIENTS.length,d:0,w:0,ok:0};
+  PATIENTS.forEach(p=>{const st=statusForState(p);p.st=st;c[st]++;});
+  return c;
+}
+function updateWardSummary(){
+  const c=wardCounts();
+  [['homeTotal',c.total],['homeCritical',c.d],['homeWarning',c.w],['homeStable',c.ok],['sumTotal',c.total],['sumCritical',c.d],['sumWarning',c.w],['sumStable',c.ok]].forEach(([id,val])=>{const el=document.getElementById(id);if(el)el.textContent=val;});
+  const badge=document.getElementById('wardBadge');if(badge)badge.textContent=`Ward 7B · ${c.d} Critical · ${c.w} Warning`;
+}
+function toastWardSummary(){
+  const c=wardCounts();
+  toast(`Ward 7B: ${c.total} beds · ${c.d} critical · ${c.w} warning · ${c.ok} stable`,c.d?'danger':c.w?'warn':'ok');
+}
+function renderUseCases(){
+  const box=document.getElementById('scenarioList');if(!box)return;
+  box.innerHTML=USE_CASES.map(u=>`<button class="scenario-btn" onclick="scenario('${u.key}')"><span>${u.icon}</span><span>${u.button}</span></button>`).join('');
+}
+function abnormalBeds(){
+  return PATIENTS.map((p,i)=>({p,i,st:statusForState(p),actions:getDoctorActions(p)}))
+    .filter(x=>x.st!=='ok')
+    .sort((a,b)=>(a.st===b.st?0:a.st==='d'?-1:1)||bedNo(a.p)-bedNo(b.p));
+}
+function renderWardScanOutput(){
+  const box=document.getElementById('wardScanOutput');if(!box)return;
+  if(!wardScanReady){
+    box.innerHTML='<div class="scan-empty">กดปุ่มเพื่อให้ AGI สแกนทั้งวอร์ด แล้วสร้างลิงก์ไปยังเตียงที่ผิดปกติ</div>';
+    return;
+  }
+  const list=abnormalBeds();
+  if(!list.length){
+    box.innerHTML='<div class="scan-head"><div class="scan-title">AGI Ward Scan</div><div class="scan-count" style="color:var(--ok)">0 abnormal</div></div><div class="scan-empty">ทุกเตียงอยู่ในช่วงเป้าหมาย ยังไม่มีเตียงที่ต้อง follow-up เร่งด่วน</div>';
+    return;
+  }
+  box.innerHTML=`<div class="scan-head"><div class="scan-title">AGI Ward Scan · Abnormal Beds</div><div class="scan-count">${list.length} beds</div></div>
+    <div class="abn-list">${list.map(({p,i,st,actions})=>{
+      const top=actions.issues.find(x=>x.type===st)||actions.issues[0];
+      return `<button class="abn-link ${st}" onclick="openAbnormalPatient(${i})">
+        <div class="abn-bed">${p.bed} · ${st==='d'?'CRITICAL':'WATCH'}</div>
+        <div class="abn-name">${p.name}</div>
+        <div class="abn-why">${top.param} · ${top.why}</div>
+      </button>`;
+    }).join('')}</div>`;
+}
+function runWardAgiScan(){
+  wardScanReady=true;
+  renderWardScanOutput();
+  const list=abnormalBeds();
+  if(list.length){
+    toast(`AGI พบเตียง abnormal ${list.length} เตียง · กดรายการเพื่อเปิดหน้าเตียง`,list[0].st==='d'?'danger':'warn');
+  }else{
+    toast('AGI Scan: ไม่พบเตียง abnormal','ok');
+  }
+}
+function jumpToAbnormalBed(i,showToast=true){
+  currentIndex=i;
+  activeActionIndex=i;
+  renderMap();
+  renderWardScanOutput();
+  const node=document.querySelector(`.bed-node[aria-label="เปิดข้อมูลเตียง ${PATIENTS[i].bed}"]`);
+  if(node)node.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+  const inspector=document.getElementById('bedInspector');
+  if(inspector)setTimeout(()=>inspector.scrollIntoView({behavior:'smooth',block:'center'}),180);
+  if(showToast)toast(`ลิงก์ไปที่เตียง abnormal: ${PATIENTS[i].bed}`,statusForState(PATIENTS[i])==='d'?'danger':'warn');
+}
+function getDoctorActions(p){
+  const issues=[];
+  const A=(text,cost,confidence)=>({text,cost,confidence});
+  const add=(type,param,why,normal,direction,actions)=>issues.push({type,param,why,normal,direction,actions});
+  if(p.spo2<88)add('d',`SpO₂ ${p.spo2}%`,'ต่ำกว่า safe threshold','เป้าหมาย 88-92% COPD / 92-96% ทั่วไป','เพิ่มค่า SpO₂',[A('จัดท่า high Fowler และเช็ก probe/สาย O₂','฿0-120','93%'),A('เพิ่ม O₂ support ตาม protocol','฿250-900','96%'),A('reassess SpO₂ ภายใน 5-10 นาที','฿0-120','91%'),A('พิจารณา ABG หาก SpO₂ ยังไม่ขึ้น','฿650-1,900','88%')]);
+  else if(p.spo2<92)add('w',`SpO₂ ${p.spo2}%`,'ต่ำกว่า target ของผู้ป่วยกลุ่มนี้','เป้าหมาย 88-92% COPD / 92-96% ทั่วไป','เพิ่มค่า SpO₂',[A('ตรวจตำแหน่ง probe และ waveform','฿0-80','90%'),A('ปรับ O₂ ตาม protocol','฿250-700','89%'),A('ติดตาม SpO₂ ต่อเนื่อง 15 นาที','฿0-120','86%'),A('แจ้งแพทย์หากต้องเพิ่ม O₂ เกิน baseline','฿0-120','82%')]);
+  if(p.hr>130)add('d',`HR ${p.hr} bpm`,'tachycardia รุนแรง','ปกติ 60-100 bpm','ลด HR / หา cause',[A('สั่ง ECG 12-lead','฿350-900','95%'),A('เปิด IV access และตรวจ electrolyte','฿350-1,200','90%'),A('ประเมิน sepsis / arrhythmia / pain เป็น cause','฿0-250','88%')]);
+  else if(p.hr<40)add('d',`HR ${p.hr} bpm`,'bradycardia รุนแรง','ปกติ 60-100 bpm','เพิ่ม HR / stabilize',[A('ประเมิน BP/mental status/chest pain','฿0-150','96%'),A('เตรียม atropine หรือ pacing ตาม ACLS','฿450-4,500','92%'),A('ติด monitor และแจ้งแพทย์ทันที','฿0-650','95%')]);
+  else if(p.hr>110)add('w',`HR ${p.hr} bpm`,'สูงกว่า baseline ชัดเจน','ปกติ 60-100 bpm','ลด HR / หา cause',[A('repeat vital signs ภายใน 15 นาที','฿0-120','87%'),A('ตรวจ pain, fever, dehydration','฿0-250','84%'),A('พิจารณา ECG หากยังสูงต่อเนื่อง','฿350-900','78%'),A('บันทึก trend เทียบ personal baseline','฿0-120','80%')]);
+  if(p.bp>180)add('d',`BP ${p.bp}/${p.dia}`,'hypertensive crisis','เป้าหมาย SBP 90-140 / DBP 60-90','ลด BP อย่างควบคุม',[A('วัด BP manual ซ้ำและเช็ก cuff size','฿0-120','95%'),A('ตรวจ neuro deficit / chest pain / dyspnea','฿0-350','92%'),A('พิจารณา IV antihypertensive ตามแพทย์สั่ง','฿900-4,500','88%')]);
+  else if(p.bp<80)add('d',`BP ${p.bp}/${p.dia}`,'hypotension / shock risk','เป้าหมาย SBP ≥90 และ MAP ≥65','เพิ่ม BP / perfusion',[A('วัด BP ซ้ำและประเมิน MAP','฿0-120','96%'),A('ให้ fluid bolus ตามข้อบ่งชี้','฿250-900','92%'),A('ตรวจ lactate และแจ้งแพทย์ทันที','฿600-2,200','94%'),A('ตั้ง monitor BP/MAP ต่อเนื่องหลัง bolus','฿0-250','90%')]);
+  else if(p.bp<90)add('w',`BP ${p.bp}/${p.dia}`,'borderline hypotension','เป้าหมาย SBP ≥90 และ MAP ≥65','เพิ่ม BP / perfusion',[A('repeat BP ภายใน 15 นาที','฿0-120','88%'),A('ประเมิน volume status และ I/O','฿0-250','84%'),A('เตรียม IV fluid หาก BP ลดต่อเนื่อง','฿250-900','76%')]);
+  if(p.temp>=39)add('d',`Temp ${p.temp.toFixed(1)}°C`,'ไข้สูงมาก','ปกติ 36.0-37.5°C','ลดอุณหภูมิ',[A('ให้ antipyretic ตาม protocol','฿80-350','93%'),A('เริ่ม cooling measure','฿0-250','87%'),A('หา source infection และส่ง lab ตามข้อบ่งชี้','฿500-1,800','82%'),A('repeat temp หลัง intervention 30-60 นาที','฿0-120','86%')]);
+  else if(p.temp>=38.5)add('d',`Temp ${p.temp.toFixed(1)}°C`,'เข้าเกณฑ์ sepsis screen','ปกติ 36.0-37.5°C','ลดอุณหภูมิ / หา infection',[A('สั่ง CBC และ lactate','฿600-1,600','92%'),A('เก็บ blood culture ก่อน antibiotic หากทำได้','฿600-1,800','89%'),A('ประเมิน antibiotic timing กับแพทย์','฿0-1,400','86%'),A('repeat temp และ HR หลังเริ่ม bundle','฿0-120','84%')]);
+  else if(p.temp>38)add('w',`Temp ${p.temp.toFixed(1)}°C`,'สูงกว่า personal baseline','ปกติ 36.0-37.5°C','ลดอุณหภูมิ',[A('repeat temp ภายใน 30 นาที','฿0-80','84%'),A('ประเมินหนาวสั่น/ไอ/แผล/ปัสสาวะ','฿0-250','80%'),A('พิจารณา antipyretic หากมีอาการ','฿80-350','74%')]);
+  if(p.rr>30)add('d',`RR ${p.rr}/min`,'respiratory distress','ปกติ 12-20/min','ลด RR / เพิ่ม oxygenation',[A('ประเมิน work of breathing','฿0-120','94%'),A('ให้ O₂ mask ตาม protocol','฿250-900','90%'),A('พิจารณา CXR/ABG และแจ้งแพทย์','฿900-3,500','84%')]);
+  else if(p.rr<8)add('d',`RR ${p.rr}/min`,'respiratory depression','ปกติ 12-20/min','เพิ่ม RR / support airway',[A('ประเมิน airway ทันที','฿0-120','96%'),A('ทบทวน sedation/opioid effect','฿0-250','90%'),A('เตรียม support ventilation','฿1,000-5,500','88%')]);
+  else if(p.rr>24)add('w',`RR ${p.rr}/min`,'หายใจเร็วผิดปกติ','ปกติ 12-20/min','ลด RR / หา cause',[A('ติดตาม RR และ SpO₂ ต่อเนื่อง','฿0-120','86%'),A('ประเมิน infection/pain/anxiety','฿0-250','82%'),A('จัดท่าและประเมินซ้ำใน 15 นาที','฿0-120','78%')]);
+  if(p.urine<.3)add('d',`Urine ${p.urine.toFixed(2)} ml/kg/hr`,'เสี่ยง AKI / hypoperfusion','เป้าหมาย ≥0.5 ml/kg/hr','เพิ่ม urine output',[A('ทบทวน fluid balance และ catheter patency','฿0-150','91%'),A('ตรวจ Cr/electrolyte','฿500-1,400','88%'),A('แจ้งแพทย์เพื่อประเมิน fluid challenge','฿0-850','84%')]);
+  else if(p.urine<.5)add('w',`Urine ${p.urine.toFixed(2)} ml/kg/hr`,'ต่ำกว่า target','เป้าหมาย ≥0.5 ml/kg/hr','เพิ่ม urine output',[A('ติดตาม I/O รายชั่วโมง','฿0-120','83%'),A('ประเมิน hydration และ edema','฿0-250','78%'),A('repeat urine output ใน 1 ชั่วโมง','฿0-120','76%'),A('แจ้งแพทย์หากยังต่ำต่อเนื่อง 2 ชั่วโมง','฿0-120','80%')]);
+  if(p.pain>=7)add('d',`Pain ${p.pain}/10`,'pain score สูง','เป้าหมาย ≤3/10','ลด pain score',[A('ให้ analgesic ตาม protocol','฿120-650','90%'),A('ประเมิน pain source และ surgical site','฿0-250','86%'),A('reassess pain หลังให้ยา 15-30 นาที','฿0-120','84%'),A('ติดตาม sedation/respiratory depression หลัง analgesic','฿0-120','82%')]);
+  else if(p.pain>=4)add('w',`Pain ${p.pain}/10`,'ปวดระดับกลาง','เป้าหมาย ≤3/10','ลด pain score',[A('ประเมินตำแหน่งและลักษณะปวด','฿0-150','82%'),A('พิจารณา analgesic non-opioid/PRN','฿80-350','76%'),A('reassess pain score ภายใน 30 นาที','฿0-120','78%')]);
+  if(p.fallRisk)add('d','Bed exit sensor','เสี่ยงลุกตกเตียง','เป้าหมาย no unassisted bed exit','ลด fall risk',[A('เรียกพยาบาลเข้า bedside','฿0-120','93%'),A('เปิด side rail และ bed alarm','฿0-120','91%'),A('ประเมิน delirium/toileting need','฿0-450','82%'),A('ย้าย call bell และของจำเป็นให้อยู่ในระยะเอื้อม','฿0-120','86%')]);
+  if((p.pos==='right'||p.pos==='left')&&p.posSec>5400)add('w',`Position ${Math.floor(p.posSec/60)} min`,'แรงกดสะสมเกิน threshold','เป้าหมายเปลี่ยนท่าทุก ≤120 นาที','ลด pressure time',[A('สั่งพลิกตัวหรือ pressure relief','฿0-250','88%'),A('ตรวจผิวหนังบริเวณ sacrum/heel','฿0-250','84%'),A('ตั้ง timer รอบถัดไปไม่เกิน 120 นาที','฿0-100','86%'),A('บันทึกตำแหน่งใหม่และ pressure zone หลังพลิกตัว','฿0-120','82%')]);
+  if(!issues.length)add('ok','All parameters','ยังไม่พบค่าผิดปกติ','อยู่ใน target range','คงค่า / monitor',[A('ติดตาม vital signs ตามรอบ','฿0-120','78%'),A('คง personal baseline monitoring','฿0-120','76%'),A('ทบทวนอีกครั้งหากมี alert ใหม่','฿0-120','74%'),A('ยืนยันว่าไม่มี pending doctor approval','฿0-120','72%')]);
+  const priority=issues.some(x=>x.type==='d')?'d':issues.some(x=>x.type==='w')?'w':'ok';
+  const headline=priority==='d'?'ต้องให้แพทย์ review ทันที':priority==='w'?'ควรติดตามและสั่งแผนป้องกัน':'ไม่ต้องมี intervention เร่งด่วน';
+  return {priority,headline,issues};
+}
+function actionOutputHtml(i,isReady=false){
+  const p=PATIENTS[i];
+  if(!p)return'';
+  if(!isReady)return`<div class="action-output empty" id="bedActionOutput">
+    <div class="ao-head"><div class="ao-title">AGI Action Output</div><div class="ao-priority">WAITING</div></div>
+    <div class="ao-empty-copy">กด “AGI คำนวณ Action เตียงนี้” เพื่อให้ระบบอ่านค่าผิดปกติของเตียง ${p.bed} แล้วสรุปคำแนะนำสำหรับแพทย์</div>
+  </div>`;
+  const r=getDoctorActions(p);
+  return`<div class="action-output ${r.priority}" id="bedActionOutput">
+    <div class="ao-head"><div class="ao-title">AGI Action Output</div><div class="ao-priority">${r.priority==='d'?'CRITICAL':r.priority==='w'?'WATCH':'STABLE'}</div></div>
+    <div class="ao-summary">${r.headline}</div>
+    <ul class="ao-list">${r.issues.map(x=>`<li>
+      <div class="ao-param">${x.param} · ${x.why}</div>
+      <div class="ao-signal-meta">
+        <span class="ao-signal-pill">target: ${x.normal}</span>
+        <span class="ao-signal-pill">ควรปรับ: ${x.direction}</span>
+      </div>
+      <div class="ao-action">${x.actions.map((a,n)=>`<div class="ao-action-row"><span class="ao-num">${n+1}</span><span class="ao-text">${a.text}</span><span class="ao-action-metrics"><span class="ao-mini cost">${a.cost}</span><span class="ao-mini conf">${a.confidence}</span></span></div>`).join('')}</div>
+    </li>`).join('')}</ul>
+  </div>`;
+}
+function renderDetailActionOutput(i){
+  const box=document.getElementById('detailActionOutput');if(!box)return;
+  box.innerHTML=actionOutputHtml(i,true);
+}
+function runBedAgi(i){
+  activeActionIndex=i;
+  renderBedInspector(i);
+  renderDetailActionOutput(i);
+  const p=PATIENTS[i],st=statusForState(p);
+  toast(`AGI คำนวณ action สำหรับ ${p.bed} แล้ว`,st==='d'?'danger':st==='w'?'warn':'ok');
+}
+function abnormalListHtml(){
+  const list=abnormalBeds();
+  if(!list.length)return`<div class="ins-abnormal">
+    <div class="ins-abnormal-head"><div class="ins-abnormal-title">Abnormal Beds</div><div class="ins-abnormal-count" style="color:var(--ok)">0</div></div>
+    <div class="ao-empty-copy">ยังไม่มีเตียงผิดปกติในรอบ scan นี้</div>
+  </div>`;
+  return`<div class="ins-abnormal">
+    <div class="ins-abnormal-head"><div class="ins-abnormal-title">Abnormal Beds</div><div class="ins-abnormal-count">${list.length}</div></div>
+    <div class="ins-abnormal-list">${list.map(({p,i,st,actions})=>{
+      const top=actions.issues.find(x=>x.type===st)||actions.issues[0];
+      return `<button class="ins-abn-link ${st}" onclick="openAbnormalPatient(${i})">
+        <div class="ins-abn-bed"><span>${p.bed}</span><span class="ins-abn-priority">${st==='d'?'CRITICAL':'WATCH'}</span></div>
+        <div class="ins-abn-name">${p.name}</div>
+        <div class="ins-abn-why">${top.param} · ${top.why}</div>
+      </button>`;
+    }).join('')}</div>
+  </div>`;
+}
+function bedCard({p,i}){
+  const st=statusForState(p),active=i===currentIndex?'active':'';
+  return `<button type="button" class="bed-node ${st} ${active}" onclick="openPatient(${i})" aria-label="เปิดข้อมูลเตียง ${p.bed}">
+    <div class="bed-top"><span class="bed-id">${p.bed}</span><span class="bed-status"></span></div>
+    <div class="bed-shape"></div>
+    <div class="bed-person">${p.name}</div>
+    <div class="bed-case">${p.caseTitle}</div>
+    <div class="bed-mini"><span>HR ${p.hr}</span><span>SpO₂ ${p.spo2}%</span><span>${p.bp}/${p.dia}</span></div>
+  </button>`;
+}
+function renderMap(){
+  const ordered=PATIENTS.map((p,i)=>({p,i})).sort((a,b)=>bedNo(a.p)-bedNo(b.p));
+  const left=ordered.slice(0,6),right=ordered.slice(6);
+  const map=document.getElementById('wardMap');
+  if(map){
+    map.innerHTML=`<div class="ward-wing">${left.map(bedCard).join('')}</div><div class="ward-corridor"><div class="nurse-station">NURSE STATION</div>MAIN AISLE</div><div class="ward-wing">${right.map(bedCard).join('')}</div>`;
+  }
+  renderSidebar();
+  renderBedInspector(currentIndex??ordered[0].i);
+  updateWardSummary();
+  if(wardScanReady)renderWardScanOutput();
+}
+function renderSidebar(){
+  const box=document.getElementById('sidebarList');if(!box)return;
+  const ordered=PATIENTS.map((p,i)=>({p,i})).sort((a,b)=>bedNo(a.p)-bedNo(b.p));
+  box.innerHTML=ordered.map(({p,i})=>{
+    const st=statusForState(p);
+    return `<div class="pcard ${i===currentIndex?'active':''} ${st==='d'?'danger-c':st==='w'?'warn-c':''}" id="sb_p_${i}" onclick="switchP(${i})">
+      <div class="sdot ${st}"></div>
+      <div class="pname">${p.name}</div>
+      <div class="page">${p.age} ปี · ${p.bed}</div>
+      <div class="puse">${p.caseTitle}</div>
+      <div class="pmini"><span class="mv ${getStatus('hr',p.hr)}">HR ${p.hr}</span><span class="mv ${getStatus('spo2',p.spo2)}">SpO₂ ${p.spo2}%</span><span class="mv ${getStatus('bp',p.bp)}">BP ${p.bp}</span></div>
+    </div>`;
+  }).join('');
+}
+function renderBedInspector(i){
+  const p=PATIENTS[i],box=document.getElementById('bedInspector');if(!p||!box)return;
+  const st=statusForState(p);
+  box.innerHTML=`<div class="ins-k">Selected Bed · ${st==='d'?'Critical':st==='w'?'Warning':'Stable'}</div>
+    <div><div class="ins-title">${p.bed} · ${p.name}</div><div class="ins-sub">${p.age} ปี · HN ${p.hn}<br>${p.tags.join(' · ')}</div></div>
+    <div class="ins-case"><strong>${p.caseTitle}</strong><br>${p.caseSummary}</div>
+    <div class="ins-vitals">
+      <div class="ins-v"><span>HR</span><strong>${p.hr}</strong></div>
+      <div class="ins-v"><span>SpO₂</span><strong>${p.spo2}%</strong></div>
+      <div class="ins-v"><span>BP</span><strong>${p.bp}/${p.dia}</strong></div>
+      <div class="ins-v"><span>Temp</span><strong>${p.temp.toFixed(1)}°C</strong></div>
+      <div class="ins-v"><span>RR</span><strong>${p.rr}/min</strong></div>
+      <div class="ins-v"><span>Urine</span><strong>${p.urine.toFixed(2)}</strong></div>
+    </div>
+    <div class="ins-actions">
+      <button class="btn btn-a" onclick="openPatient(${i})">ดูค่าละเอียดของเตียงนี้</button>
+    </div>
+    ${abnormalListHtml()}`;
+}
+function openPatient(i){
+  document.getElementById('mapView').style.display='none';
+  document.getElementById('detailView').style.display='block';
+  activeActionIndex=i;
   switchP(i);
   window.scrollTo(0,0);
 }
-
-function showMap() {
-  document.getElementById('detailView').style.display = 'none';
-  document.getElementById('mapView').style.display = 'block';
-  renderMap(); // Refresh map states if they changed
+function openAbnormalPatient(i){
+  activeActionIndex=i;
+  openPatient(i);
+  toast(`เปิดหน้าเตียง ${PATIENTS[i].bed} พร้อม AGI Action Output`,statusForState(PATIENTS[i])==='d'?'danger':'warn');
 }
-
+function showMap(){
+  document.getElementById('detailView').style.display='none';
+  document.getElementById('mapView').style.display='block';
+  renderMap();
+  window.scrollTo(0,0);
+}
+function goHome(){showMap();}
+function setPositionUI(pos){
+  const c=posC[pos]||posC.supine;
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.toggle('active',(b.getAttribute('onclick')||'').includes(`'${pos}'`)));
+  const body=document.getElementById('patBody');if(body)body.setAttribute('transform',`translate(150,83) rotate(${c.rot})`);
+  const op=c.pr?'.8':'0';
+  ['pZone','pCore','pressLabel'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.opacity=op;});
+  const posLbl=document.getElementById('vPosLbl');if(posLbl)posLbl.textContent=c.lbl;
+  const posLabel=document.getElementById('posLabel');if(posLabel)posLabel.textContent=`${c.lbl} · ${S.angle}°`;
+  const angle=document.getElementById('angleLabel');if(angle)angle.textContent=`${S.angle}°`;
+}
+function applyPatientState(p){
+  Object.assign(S,{hr:p.hr,spo2:p.spo2,bp:p.bp,dia:p.dia,temp:p.temp,rr:p.rr,pain:p.pain,urine:p.urine,pos:p.pos,angle:p.angle,posSec:p.posSec,fallRisk:!!p.fallRisk});
+  document.getElementById('sHR').value=S.hr;
+  document.getElementById('sSpo2').value=S.spo2;
+  document.getElementById('sBP').value=S.bp;
+  document.getElementById('sTemp').value=Math.round(S.temp*10);
+  document.getElementById('sRR').value=S.rr;
+  document.getElementById('sPain').value=S.pain;
+  document.getElementById('sAngle').value=S.angle;
+  document.getElementById('lAngle').textContent=`${S.angle}°`;
+  ['hr','spo2','bp','temp','rr','pain'].forEach(k=>renderVital(k,S[k]));
+  renderUrine(S.urine);
+  setPositionUI(S.pos);
+  document.getElementById('ecgHR').textContent=`${Math.round(S.hr)} bpm`;
+}
+function syncCurrentPatient(){
+  if(currentIndex===null||!PATIENTS[currentIndex])return;
+  const nextStatus=statusForState({...S,scenario:PATIENTS[currentIndex].scenario});
+  Object.assign(PATIENTS[currentIndex],{hr:S.hr,spo2:S.spo2,bp:S.bp,dia:S.dia,temp:S.temp,rr:S.rr,pain:S.pain,urine:S.urine,pos:S.pos,angle:S.angle,posSec:S.posSec,fallRisk:!!S.fallRisk,st:nextStatus});
+  renderSidebar();
+  renderBedInspector(currentIndex);
+  renderDetailActionOutput(currentIndex);
+  updateWardSummary();
+}
 function switchP(i){
-  const p = PATIENTS[i];
-  if(!p) return;
-  currentPatient = p;
-
-  document.querySelectorAll('.pcard').forEach((c,j)=>c.classList.toggle('active',i===j));
-  
-  document.querySelector('.phead h1').textContent = p.name;
-  document.querySelector('.phead div[style*="color:var(--muted)"]').textContent = `HN: ${p.hn} · เข้ารักษา ${p.adm} · เตียง ${p.bed}`;
-  
-  const tagBox = document.querySelector('.tags');
-  tagBox.innerHTML = p.tags.map((t, idx) => {
-    let cls = 'tag-day';
-    if(idx === 0) cls = 'tag-dx';
-    if(t.includes('ICU') || t.includes('Ward') || t.includes('Stable') || t.includes('Risk') || t.includes('Therapy')) cls = 'tag-ward';
+  const p=PATIENTS[i];if(!p)return;
+  currentIndex=i;currentPatient=p;
+  document.getElementById('dBedName').textContent=`กำลังดูข้อมูล: เตียง ${p.bed} · ${p.caseTitle}`;
+  document.querySelector('.phead h1').textContent=p.name;
+  document.querySelector('.phead div[style*="color:var(--muted)"]').textContent=`HN: ${p.hn} · เข้ารักษา ${p.adm} · เตียง ${p.bed}`;
+  const tagBox=document.querySelector('.tags');
+  tagBox.innerHTML=p.tags.map((t,idx)=>{
+    let cls='tag-day';
+    if(idx===0)cls='tag-dx';
+    if(t.includes('ICU')||t.includes('Ward')||t.includes('Stable')||t.includes('Risk')||t.includes('Therapy')||t.includes('Monitor')||t.includes('Sensor'))cls='tag-ward';
     return `<span class="tag ${cls}">${t}</span>`;
   }).join('');
-
-  document.getElementById('bradenScore').textContent = p.braden;
-  document.getElementById('news2Score').textContent = p.news2;
-  document.getElementById('sepsisRs').textContent = p.sepsis;
+  document.getElementById('bradenScore').textContent=p.braden;
+  document.getElementById('news2Score').textContent=p.news2;
+  document.getElementById('sepsisRs').textContent=p.sepsis;
   document.getElementById('news2Rb').className=`rb ${p.news2>=5?'hi':p.news2>=3?'med':'low'}`;
   document.getElementById('sepsisRb').className=`rb ${p.sepsis==='High'?'hi':p.sepsis==='Med'?'med':'low'}`;
   document.getElementById('bradenRb').className=`rb ${p.braden<=12?'hi':p.braden<=14?'med':'low'}`;
-  
-  scenario(p.scenario);
+  applyPatientState(p);
+  renderSidebar();
+  renderBedInspector(i);
+  renderDetailActionOutput(i);
+  checkAGI();
+  toast(`โหลดข้อมูล ${p.bed}: ${p.name}`,statusForState(p)==='d'?'warn':'ok');
 }
 
 function toggleClock(){
@@ -696,6 +1094,7 @@ setInterval(()=>{
   document.getElementById('clock').textContent=n.toLocaleTimeString('th-TH',opt);
 },1000);
 
+renderUseCases();
 renderMap();
 </script>
 </body>
