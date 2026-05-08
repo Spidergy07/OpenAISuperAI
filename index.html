@@ -205,7 +205,7 @@ canvas.ecg{width:100%;height:56px;}
 .bdiff.dn{background:rgba(255,176,32,.12);color:var(--warn);}
 .bdiff.nm{background:rgba(46,213,115,.1);color:var(--ok);}
 canvas.spark{width:100%;height:24px;margin-top:6px;}
-.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px;}
+.sgrid{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:13px;}
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
 .ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .pt{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
@@ -387,7 +387,6 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
   </div>
 
   <div class="sgrid">
-    <div class="panel" id="agiRecommendationsPanel"><div class="ph"><div class="pt">🤖 AGI Recommendations</div><div style="font-size:10px;color:var(--muted);">รอ Doctor Approve</div></div><div class="pb" id="alertsBox"></div></div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div class="panel">
         <div class="ph"><div class="pt">🛏️ Bed Position</div><div class="ptimer" id="posTimer">1:42:15</div></div>
@@ -668,59 +667,7 @@ function chgAngle(v){
 
 // AGI CHECK
 function checkAGI(){
-  const alerts=[];
-  const {hr,spo2,bp,temp,rr,pain,pos}=S;
-  if(spo2<88)alerts.push({t:'d',icon:'😮‍💨',title:'SpO₂ วิกฤต < 88%',desc:`SpO₂ ${spo2}% ต่ำกว่า safe threshold สำหรับ COPD · ปล่อยทิ้งไว้เสี่ยง respiratory failure`,action:'เพิ่ม O₂ supplement 4L/min',key:'o2'});
-  else if(spo2<90)alerts.push({t:'w',icon:'🫁',title:`SpO₂ ${spo2}% — ต่ำกว่า target range`,desc:'Target 90–92% สำหรับ COPD · ติดตามอย่างใกล้ชิด',action:null,key:'spo2w'});
-  const hrDev=(hr-BL.hr)/BL.hr;
-  if(hr>130)alerts.push({t:'d',icon:'❤️',title:'Tachycardia รุนแรง > 130 bpm',desc:`HR ${hr} · เสี่ยง Sepsis / Arrhythmia / Pain · ต้องการ ECG 12-lead`,action:'ECG 12-lead + IV access',key:'tachy'});
-  else if(hr<40)alerts.push({t:'d',icon:'💔',title:'Bradycardia รุนแรง < 40 bpm',desc:`HR ${hr} · เสี่ยง cardiac arrest`,action:'เรียกทีมด่วน',key:'brady'});
-  else if(hrDev>.3)alerts.push({t:'w',icon:'📈',title:`HR +${Math.round(hrDev*100)}% จาก personal baseline`,desc:`HR ${hr} bpm · baseline คนนี้ ${BL.hr} bpm · deviation >${Math.round(hrDev*100)}% เสี่ยง early sepsis / pain`,action:null,key:'hrdev'});
-  if(temp>=38.5)alerts.push({t:'d',icon:'🌡️',title:`Temp ${temp.toFixed(1)}°C — Sepsis Risk`,desc:`Baseline ${BL.temp}°C · +${(temp-BL.temp).toFixed(1)}°C · HR สูงด้วย → qSOFA positive · ตรวจ Blood Culture ด่วน`,action:'Blood Culture + CBC + Lactate',key:'sepsis'});
-  else if(temp>38)alerts.push({t:'w',icon:'🌡️',title:`Temp ${temp.toFixed(1)}°C — สูงกว่า personal baseline`,desc:`Baseline ${BL.temp}°C · +${(temp-BL.temp).toFixed(1)}°C · ติดตาม`,action:null,key:'tempw'});
-  if(bp>180)alerts.push({t:'d',icon:'🩺',title:'Hypertensive Crisis > 180 mmHg',desc:`BP ${bp} mmHg · เสี่ยง stroke / organ damage · ต้องการ IV antihypertensive ทันที`,action:'IV Labetalol / Nicardipine',key:'htn'});
-  else if(bp<80)alerts.push({t:'d',icon:'🩺',title:`Hypotension — BP ${bp} mmHg`,desc:'BP ต่ำวิกฤต · เสี่ยง septic shock · IV fluid bolus ทันที',action:'IV NSS 500ml bolus',key:'shock'});
-  if(rr<8||rr>30)alerts.push({t:'d',icon:'💨',title:`Respiratory ${rr<8?'Failure':'Distress'}`,desc:`RR ${rr}/min · ${rr<8?'น้อยเกิน = CO2 คั่ง':'มากเกิน = ต้องการ oxygen support'}`,action:'ประเมิน airway + O₂ mask',key:'rr'});
-  if(pain>=7)alerts.push({t:'d',icon:'😣',title:`Pain Score ${pain}/10 — รุนแรง`,desc:'Micro-expression AI ตรวจพบความเจ็บปวดรุนแรง · ผู้ป่วยอาจสื่อสารไม่ได้',action:'Morphine 2mg IV PRN',key:'pain'});
-  else if(pain>=4)alerts.push({t:'w',icon:'😣',title:`Pain Score ${pain}/10`,desc:'ความเจ็บปวดระดับกลาง · พิจารณา analgesic',action:null,key:'painw'});
-  if(S.urine<.3)alerts.push({t:'d',icon:'💧',title:`Urine Output ${S.urine.toFixed(2)} ml/kg/hr — ต่ำวิกฤต`,desc:'ต่ำกว่า 0.3 ml/kg/hr · เสี่ยง AKI / hypoperfusion · ต้องประเมิน fluid balance',action:'ประเมิน I/O + แจ้งแพทย์',key:'urine'});
-  else if(S.urine<.5)alerts.push({t:'w',icon:'💧',title:`Urine Output ${S.urine.toFixed(2)} ml/kg/hr`,desc:'ต่ำกว่า target 0.5 ml/kg/hr · ติดตามต่อเนื่อง',action:null,key:'urinew'});
-  if(S.fallRisk)alerts.push({t:'d',icon:'🚨',title:'Bed Exit / Fall Risk Active',desc:'เตียงตรวจพบ pattern การลุกจากเตียงหรือการเคลื่อนตัวผิดปกติ · ต้องให้พยาบาลตรวจทันที',action:'เรียกพยาบาล + เปิด side rail',key:'fall'});
-  if((pos==='right'||pos==='left')&&S.posSec>5400)alerts.push({t:'w',icon:'🛏️',title:'แรงกดสะสม — ควรพลิกตัว',desc:`นอน ${posC[pos].lbl} ${Math.floor(S.posSec/60)} นาที · เสี่ยง Pressure Injury Grade I บริเวณกระดูกก้นกบ`,action:'ปรับท่านอน (motor bed)',key:'repos'});
-  renderAlerts(alerts);updateAGIStatus(alerts);updateRiskScores();
-}
-
-function renderAlerts(alerts){
-  const panel=document.getElementById('agiRecommendationsPanel');
-  const box=document.getElementById('alertsBox');
-  if(!box)return;
-  if(alerts.length===0){
-    if(panel)panel.style.display='none';
-    box.innerHTML='';
-    return;
-  }
-  if(panel)panel.style.display='';
-  box.innerHTML=alerts.map(a=>`
-    <div class="aitem ${a.t}">
-      <div class="aicon">${a.icon}</div>
-      <div class="ac">
-        <div class="atitle">${a.title}</div>
-        <div class="adesc">${a.desc}</div>
-        ${a.action&&a.t!=='ok-a'?`<div class="abtn-row">
-          <button class="btn btn-a" onclick="openModal('${a.key}','${a.icon}','${a.title.replace(/'/g,"\\'")}','${a.action.replace(/'/g,"\\'")}')">✓ Approve: ${a.action}</button>
-          <button class="btn btn-deny" onclick="this.closest('.aitem').style.opacity='.4'">Deny</button>
-        </div>`:''}
-        ${!a.action&&a.t!=='ok-a'?`<div class="atime">🔔 ต้องการหมอดูแล — ไม่สามารถ auto-execute ได้</div>`:''}
-      </div>
-    </div>`).join('');
-}
-
-function updateAGIStatus(alerts){
-  const hasD=alerts.some(a=>a.t==='d'),hasW=alerts.some(a=>a.t==='w');
-  const dot=document.getElementById('agiDot'),lbl=document.getElementById('agiLabel'),msg=document.getElementById('agiMsg'),st=document.getElementById('agiStatus');
-  if(hasD){st.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:12px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.3)';dot.style.background='var(--danger)';lbl.style.color='var(--danger)';lbl.textContent='⚠ CRITICAL';msg.textContent=`${alerts.filter(a=>a.t==='d').length} critical — ต้องการหมอทันที`;}
-  else if(hasW){st.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:12px;background:rgba(255,176,32,.06);border:1px solid rgba(255,176,32,.25)';dot.style.background='var(--warn)';lbl.style.color='var(--warn)';lbl.textContent='⚡ WARNING';msg.textContent=`${alerts.filter(a=>a.t==='w').length} parameter ผิดปกติ`;}
-  else{st.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:12px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2)';dot.style.background='var(--accent)';lbl.style.color='var(--accent)';lbl.textContent='AGI MONITORING';msg.textContent='ระบบปกติ · 12 parameters';}
+  updateRiskScores();
 }
 
 function updateRiskScores(){
