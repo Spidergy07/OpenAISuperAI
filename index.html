@@ -338,7 +338,13 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
 <div class="toast" id="toast"><span id="toastText">Done</span></div>
 
 <script>
-const S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false,_h24:true};
+const PATIENTS = [
+  { name: 'นาย สมชาย ใจดี', hn: '2024-07743', bed: '7B-02', adm: '4 พ.ค. 2026', tags: ['COPD Stage III', 'Hypertension', 'Step-Down ICU', 'Day 8'], hr: 92, spo2: 91, bp: 155, temp: 37.1, rr: 19, pain: 2, news2: 4, braden: 13, sepsis: 'Low' },
+  { name: 'นาง มาลี สวัสดี', hn: '2024-08112', bed: '7B-05', adm: '6 พ.ค. 2026', tags: ['Pneumonia', 'Type 2 Diabetes', 'ICU Step-Down', 'Day 2'], hr: 118, spo2: 87, bp: 142, temp: 38.1, rr: 24, pain: 5, news2: 7, braden: 11, sepsis: 'Medium' },
+  { name: 'นาย วิชัย ศรีสุข', hn: '2024-09221', bed: '7B-08', adm: '7 พ.ค. 2026', tags: ['Post-Op Day 2', 'Stable', 'Ward 7B', 'Day 1'], hr: 68, spo2: 96, bp: 128, temp: 36.6, rr: 16, pain: 1, news2: 1, braden: 18, sepsis: 'Low' }
+];
+
+let S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false,_h24:true};
 const BL={hr:68,spo2:90,bp:150,temp:36.6,rr:20};
 
 // Clock (removed old interval here)
@@ -580,9 +586,47 @@ function toast(msg,type='ok'){
 
 // Patient switch
 function switchP(i){
+  const p = PATIENTS[i];
+  if(!p) return;
+
+  // Update UI Cards
   document.querySelectorAll('.pcard').forEach((c,j)=>c.classList.toggle('active',i===j));
-  const msgs=['เปิดข้อมูล นาย สมชาย ใจดี','⚠ นาง มาลี — SpO₂ 87% Critical!','เปิดข้อมูล นาย วิชัย ศรีสุข'];
-  toast(msgs[i],i===1?'warn':'ok');
+  
+  // Update Header Info
+  document.querySelector('.phead h1').textContent = p.name;
+  document.querySelector('.phead div[style*="color:var(--muted)"]').textContent = `HN: ${p.hn} · เข้ารักษา ${p.adm} · เตียง ${p.bed}`;
+  
+  // Update Tags
+  const tagBox = document.querySelector('.tags');
+  tagBox.innerHTML = p.tags.map((t, idx) => {
+    let cls = 'tag-day';
+    if(idx === 0) cls = 'tag-dx';
+    if(t.includes('ICU') || t.includes('Ward')) cls = 'tag-ward';
+    return `<span class="tag ${cls}">${t}</span>`;
+  }).join('');
+
+  // Update State & Vitals
+  S.hr = p.hr; S.spo2 = p.spo2; S.bp = p.bp; S.temp = p.temp; S.rr = p.rr; S.pain = p.pain;
+  
+  // Update Sliders
+  document.getElementById('sHR').value = S.hr;
+  document.getElementById('sSpo2').value = S.spo2;
+  document.getElementById('sBP').value = S.bp;
+  document.getElementById('sTemp').value = Math.round(S.temp*10);
+  document.getElementById('sRR').value = S.rr;
+  document.getElementById('sPain').value = S.pain;
+
+  // Render All Vitals
+  ['hr','spo2','bp','temp','rr','pain'].forEach(k => renderVital(k, S[k]));
+  document.getElementById('ecgHR').textContent = `${Math.round(S.hr)} bpm`;
+
+  // Update Risk Scores (News2, Braden, Sepsis display)
+  document.getElementById('bradenScore').textContent = p.braden;
+  document.getElementById('news2Score').textContent = p.news2;
+  document.getElementById('sepsisRs').textContent = p.sepsis;
+  
+  checkAGI();
+  toast(`กำลังโหลดข้อมูล: ${p.name}`, i===1 ? 'warn' : 'ok');
 }
 
 function toggleClock(){
