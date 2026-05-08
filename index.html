@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGI BedCare — Interactive Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;600;700;800&family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080C12;--bg2:#0D1320;--bg3:#111927;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--text:#E8EDF5;--muted:#6B7A96;--accent:#00D4AA;--accent2:#0099FF;--warn:#FFB020;--danger:#FF4757;--ok:#2ED573;--purple:#A78BFA;--mono:'DM Mono',monospace;--sans:'Outfit','Noto Sans Thai',sans-serif;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:rgba(8,12,18,0.97);backdrop-filter:blur(12px);position:sticky;top:0;z-index:200;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+.logo-text{font-size:17px;font-weight:700;letter-spacing:-.5px;}
+.logo-text span{color:var(--accent);}
+.hdr-right{display:flex;gap:16px;align-items:center;}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pok 1.5s infinite;}
+@keyframes pok{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
+#clock{font-family:var(--mono);font-size:13px;color:var(--muted);}
+.layout{display:grid;grid-template-columns:220px 1fr 270px;min-height:calc(100vh - 53px);}
+.sidebar{border-right:1px solid var(--border);background:var(--bg2);padding:14px 10px;overflow-y:auto;}
+.controls{border-left:1px solid var(--border);background:var(--bg2);padding:14px 14px;overflow-y:auto;}
+.main{padding:16px 20px;overflow-y:auto;background:var(--bg);}
+.sl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 6px;margin:14px 0 6px;}
+.sl:first-child{margin-top:0;}
+.pcard{padding:9px 10px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;margin-bottom:5px;transition:all .2s;position:relative;}
+.pcard:hover{background:var(--bg3);border-color:var(--border2);}
+.pcard.active{background:rgba(0,212,170,.06);border-color:rgba(0,212,170,.35);}
+.pcard.warn-c{border-color:rgba(255,176,32,.3);background:rgba(255,176,32,.04);}
+.pcard.danger-c{border-color:rgba(255,71,87,.4);background:rgba(255,71,87,.06);animation:bp 2s infinite;}
+@keyframes bp{0%,100%{border-color:rgba(255,71,87,.4);}50%{border-color:rgba(255,71,87,.9);}}
+.pname{font-size:13px;font-weight:600;margin-bottom:2px;}
+.page{font-size:11px;color:var(--muted);margin-bottom:6px;}
+.pmini{display:flex;gap:6px;flex-wrap:wrap;}
+.mv{font-family:var(--mono);font-size:10px;padding:2px 5px;border-radius:4px;background:rgba(255,255,255,.05);}
+.mv.ok{color:var(--ok);}.mv.w{color:var(--warn);}.mv.d{color:var(--danger);}
+.sdot{position:absolute;top:9px;right:9px;width:7px;height:7px;border-radius:50%;}
+.sdot.ok{background:var(--ok);}
+.sdot.w{background:var(--warn);animation:pw 2s infinite;}
+.sdot.d{background:var(--danger);animation:pd 1s infinite;}
+@keyframes pw{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes pd{0%,100%{opacity:1;}50%{opacity:.1;}}
+.logbox{background:rgba(0,0,0,.3);border-radius:8px;padding:10px;max-height:160px;overflow-y:auto;font-family:var(--mono);font-size:10px;line-height:1.9;}
+.logbox::-webkit-scrollbar{width:3px;}
+.logbox::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.log-line{display:flex;gap:8px;}
+.log-time{color:var(--muted);white-space:nowrap;}
+.log-ok{color:var(--ok);}.log-warn{color:var(--warn);}.log-d{color:var(--danger);}.log-info{color:var(--accent2);}
+.phead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--border);}
+.phead h1{font-size:21px;font-weight:700;margin-bottom:3px;}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:5px;}
+.tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;}
+.tag-dx{background:rgba(167,139,250,.12);color:var(--purple);border:1px solid rgba(167,139,250,.28);}
+.tag-ward{background:rgba(0,153,255,.1);color:var(--accent2);border:1px solid rgba(0,153,255,.22);}
+.tag-day{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border);}
+.risk-row{display:flex;gap:8px;}
+.rb{text-align:center;padding:8px 12px;border-radius:9px;min-width:70px;}
+.rb .rs{font-size:22px;font-weight:800;font-family:var(--mono);}
+.rb .rl{font-size:9px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+.rb.low{background:rgba(46,213,115,.07);border:1px solid rgba(46,213,115,.18);}
+.rb.med{background:rgba(255,176,32,.07);border:1px solid rgba(255,176,32,.22);}
+.rb.med .rs{color:var(--warn);}
+.rb.hi{background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.28);}
+.rb.hi .rs{color:var(--danger);}
+.wave-wrap{height:56px;position:relative;overflow:hidden;border-radius:8px;background:rgba(0,0,0,.3);margin-bottom:13px;border:1px solid var(--border);}
+canvas.ecg{width:100%;height:56px;}
+.wlabel{position:absolute;top:5px;left:8px;font-size:10px;font-family:var(--mono);color:var(--muted);}
+.wval{position:absolute;top:5px;right:10px;font-family:var(--mono);font-size:12px;color:var(--ok);}
+.vgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:13px;}
+.vc{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:12px 14px;position:relative;overflow:hidden;transition:border-color .3s,background .3s;}
+.vc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.vc.ok::before{background:var(--ok);}
+.vc.w::before{background:var(--warn);}
+.vc.d::before{background:var(--danger);animation:barp 1s infinite;}
+@keyframes barp{0%,100%{opacity:1;}50%{opacity:.2;}}
+.vc.ok{border-color:rgba(46,213,115,.14);}
+.vc.w{border-color:rgba(255,176,32,.18);}
+.vc.d{border-color:rgba(255,71,87,.32);}
+.vlabel{font-size:10px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;display:flex;justify-content:space-between;}
+.vval{font-family:var(--mono);font-size:26px;font-weight:500;line-height:1;margin-bottom:1px;}
+.vunit{font-size:11px;color:var(--muted);font-family:var(--mono);}
+.vc.ok .vval{color:var(--ok);}.vc.w .vval{color:var(--warn);}.vc.d .vval{color:var(--danger);}
+.vbase{font-size:10px;color:var(--muted);margin-top:5px;display:flex;align-items:center;gap:4px;}
+.bdiff{font-family:var(--mono);font-size:10px;padding:1px 5px;border-radius:3px;}
+.bdiff.up{background:rgba(255,71,87,.14);color:var(--danger);}
+.bdiff.dn{background:rgba(255,176,32,.12);color:var(--warn);}
+.bdiff.nm{background:rgba(46,213,115,.1);color:var(--ok);}
+canvas.spark{width:100%;height:24px;margin-top:6px;}
+.sgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden;}
+.ph{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pt{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+.pb{padding:12px 14px;}
+.aitem{display:flex;align-items:flex-start;gap:9px;padding:10px 11px;border-radius:8px;margin-bottom:8px;border:1px solid transparent;}
+.aitem:last-child{margin-bottom:0;}
+.aitem.d{background:rgba(255,71,87,.07);border-color:rgba(255,71,87,.25);}
+.aitem.w{background:rgba(255,176,32,.06);border-color:rgba(255,176,32,.2);}
+.aitem.i{background:rgba(0,153,255,.06);border-color:rgba(0,153,255,.18);}
+.aitem.ok-a{background:rgba(46,213,115,.06);border-color:rgba(46,213,115,.2);}
+.aicon{font-size:15px;margin-top:1px;flex-shrink:0;}
+.ac{flex:1;}
+.atitle{font-size:13px;font-weight:600;margin-bottom:2px;}
+.adesc{font-size:11px;color:var(--muted);line-height:1.5;}
+.atime{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:3px;}
+.abtn-row{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;}
+.btn{padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;border:none;cursor:pointer;transition:all .15s;font-family:var(--sans);}
+.btn-a{background:var(--accent);color:#000;}
+.btn-a:hover{background:#00f0c0;transform:scale(1.04);}
+.btn-deny{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--border2);}
+.btn-deny:hover{background:rgba(255,255,255,.12);}
+.btn-view{background:rgba(0,153,255,.1);color:var(--accent2);border:1px solid rgba(0,153,255,.22);}
+.bedmap{position:relative;background:rgba(0,0,0,.3);border-radius:9px;height:148px;overflow:hidden;border:1px solid var(--border);}
+.bedmap svg{width:100%;height:100%;}
+.ptimer{position:absolute;top:7px;right:9px;font-family:var(--mono);font-size:12px;color:var(--warn);}
+.brow{display:flex;align-items:center;margin-bottom:7px;font-size:12px;}
+.brow:last-child{margin-bottom:0;}
+.bname{color:var(--muted);width:72px;flex-shrink:0;}
+.bbar{flex:1;height:4px;background:var(--border);border-radius:3px;overflow:hidden;margin:0 9px;}
+.bfill{height:100%;border-radius:3px;transition:width .6s;}
+.bsc{font-family:var(--mono);font-size:12px;width:14px;text-align:right;}
+.tli{display:flex;gap:9px;padding-bottom:10px;border-left:1px solid var(--border);padding-left:13px;margin-left:5px;position:relative;font-size:12px;}
+.tli:last-child{border-left:none;}
+.tldot{position:absolute;left:-5px;top:2px;width:9px;height:9px;border-radius:50%;border:1.5px solid var(--bg2);}
+.tltime{font-family:var(--mono);font-size:10px;color:var(--muted);white-space:nowrap;min-width:40px;}
+.ctrl-title{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.ctrl-group{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;}
+.cgt{font-size:11px;font-weight:600;color:var(--text);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.slider-row{margin-bottom:10px;}
+.slider-row:last-child{margin-bottom:0;}
+.slider-label{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-bottom:4px;}
+.slider-label span{font-family:var(--mono);font-size:12px;font-weight:600;}
+.slider-label span.ok{color:var(--ok);}.slider-label span.w{color:var(--warn);}.slider-label span.d{color:var(--danger);}
+input[type=range]{-webkit-appearance:none;width:100%;height:4px;border-radius:2px;outline:none;background:var(--border2);cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:var(--accent);cursor:pointer;transition:background .2s,transform .15s;}
+input[type=range]::-webkit-slider-thumb:hover{background:#00f0c0;transform:scale(1.2);}
+input[type=range].warn-s::-webkit-slider-thumb{background:var(--warn);}
+input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
+.scenario-btn{width:100%;padding:8px 12px;border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:var(--text);font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;text-align:left;margin-bottom:6px;transition:all .2s;display:flex;align-items:center;gap:8px;}
+.scenario-btn:hover{background:rgba(255,255,255,.09);border-color:var(--accent);color:var(--accent);}
+.scenario-btn:last-child{margin-bottom:0;}
+.pos-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.pos-btn{padding:7px;border-radius:7px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:var(--muted);font-size:11px;font-weight:500;cursor:pointer;font-family:var(--sans);text-align:center;transition:all .2s;}
+.pos-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.pos-btn.active{background:rgba(0,212,170,.1);border-color:var(--accent);color:var(--accent);}
+.agi-status{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2);margin-bottom:12px;font-size:12px;}
+.agi-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;animation:pok 1.5s infinite;}
+.agi-label{font-weight:600;color:var(--accent);font-size:11px;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:999;opacity:0;pointer-events:none;transition:opacity .25s;}
+.overlay.show{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:24px;max-width:400px;width:90%;transform:translateY(20px);transition:transform .25s;}
+.overlay.show .modal{transform:translateY(0);}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:6px;}
+.modal p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.modal-detail{background:rgba(0,212,170,.05);border:1px solid rgba(0,212,170,.2);border-radius:9px;padding:11px 13px;margin-bottom:16px;font-size:12px;line-height:1.9;}
+.modal-detail strong{color:var(--accent);}
+.mbtns{display:flex;gap:8px;}
+.mbtns .btn{flex:1;padding:9px;font-size:12px;border-radius:8px;}
+.toast{position:fixed;top:64px;right:18px;background:var(--bg3);border:1px solid var(--border2);border-radius:9px;padding:11px 16px;font-size:12px;display:flex;align-items:center;gap:9px;box-shadow:0 8px 28px rgba(0,0,0,.45);transform:translateX(115%);transition:transform .3s;z-index:500;max-width:300px;}
+.toast.show{transform:translateX(0);}
+.toast.ok-t{border-color:rgba(46,213,115,.4);}.toast.warn-t{border-color:rgba(255,176,32,.4);}.toast.danger-t{border-color:rgba(255,71,87,.4);}
+@media(max-width:1000px){.layout{grid-template-columns:1fr;}.sidebar,.controls{display:none;}.vgrid{grid-template-columns:repeat(2,1fr);}.sgrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-icon">🧠</div><div class="logo-text">AGI <span>BedCare</span></div></div>
+  <div class="hdr-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+    <div id="clock">--:--:--</div>
+    <div style="font-size:11px;color:var(--muted);padding:3px 9px;border:1px solid var(--border);border-radius:5px;">Ward 7B · ICU Step-Down</div>
+  </div>
+</header>
+
+<div class="layout">
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sl">ผู้ป่วยในความดูแล</div>
+  <div class="pcard active warn-c" onclick="switchP(0)"><div class="sdot w"></div><div class="pname">นาย สมชาย ใจดี</div><div class="page">74 ปี · 7B-02</div><div class="pmini"><span class="mv w">HR 92</span><span class="mv ok">SpO₂ 91%</span><span class="mv w">BP 155/92</span></div></div>
+  <div class="pcard danger-c" onclick="switchP(1)"><div class="sdot d"></div><div class="pname">นาง มาลี สวัสดี</div><div class="page">81 ปี · 7B-05</div><div class="pmini"><span class="mv d">HR 118</span><span class="mv d">SpO₂ 87%</span><span class="mv w">38.1°C</span></div></div>
+  <div class="pcard" onclick="switchP(2)"><div class="sdot ok"></div><div class="pname">นาย วิชัย ศรีสุข</div><div class="page">68 ปี · 7B-08</div><div class="pmini"><span class="mv ok">HR 68</span><span class="mv ok">SpO₂ 96%</span><span class="mv ok">BP 128/78</span></div></div>
+  <div class="sl">สรุปวอร์ด</div>
+  <div style="padding:0 4px;font-size:12px;">
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--muted)">ทั้งหมด</span><span style="font-family:var(--mono);">12</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--danger)">⚠ Critical</span><span style="font-family:var(--mono);color:var(--danger);">1</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--warn)">⚡ Warning</span><span style="font-family:var(--mono);color:var(--warn);">3</span></div>
+    <div style="display:flex;justify-content:space-between;"><span style="color:var(--ok)">✓ Stable</span><span style="font-family:var(--mono);color:var(--ok);">8</span></div>
+  </div>
+  <div class="sl" style="margin-top:16px;">AGI Action Log</div>
+  <div class="logbox" id="logbox">
+    <div class="log-line"><span class="log-time">13:38</span><span class="log-warn">⚠ Pressure zone detected</span></div>
+    <div class="log-line"><span class="log-time">12:01</span><span class="log-ok">✓ Meds confirmed</span></div>
+    <div class="log-line"><span class="log-time">10:15</span><span class="log-info">↑ Bed 30° for NG tube</span></div>
+    <div class="log-line"><span class="log-time">08:12</span><span class="log-ok">✓ Reposition approved</span></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="phead">
+    <div>
+      <h1>นาย สมชาย ใจดี</h1>
+      <div style="font-size:12px;color:var(--muted);">HN: 2024-07743 · เข้ารักษา 4 พ.ค. 2026 · เตียง 7B-02</div>
+      <div class="tags"><span class="tag tag-dx">COPD Stage III</span><span class="tag tag-dx">Hypertension</span><span class="tag tag-ward">Step-Down ICU</span><span class="tag tag-day">Day 8</span></div>
+    </div>
+    <div class="risk-row">
+      <div class="rb med" id="bradenRb"><div class="rs" id="bradenScore">13</div><div class="rl">Braden</div></div>
+      <div class="rb med" id="news2Rb"><div class="rs" id="news2Score">4</div><div class="rl">NEWS2</div></div>
+      <div class="rb low" id="sepsisRb"><div class="rs" style="color:var(--ok);font-size:15px;" id="sepsisRs">Low</div><div class="rl">Sepsis</div></div>
+    </div>
+  </div>
+
+  <div class="wave-wrap"><canvas class="ecg" id="ecgC"></canvas><div class="wlabel">ECG · Lead II</div><div class="wval" id="ecgHR">92 bpm</div></div>
+
+  <div class="vgrid">
+    <div class="vc w" id="vc_hr"><div class="vlabel">Heart Rate <span>❤️</span></div><div class="vval" id="vHR">92</div><div class="vunit">bpm</div><div class="vbase">Baseline 68 · <span class="bdiff up" id="dHR">+24</span></div><canvas class="spark" id="spHR"></canvas></div>
+    <div class="vc ok" id="vc_spo2"><div class="vlabel">SpO₂ <span>🫁</span></div><div class="vval" id="vSpo2">91</div><div class="vunit">% · target 88–92 (COPD)</div><div class="vbase">Baseline 90 · <span class="bdiff nm" id="dSpo2">+1</span></div><canvas class="spark" id="spSpo2"></canvas></div>
+    <div class="vc w" id="vc_bp"><div class="vlabel">Blood Pressure <span>🩺</span></div><div class="vval" id="vBP">155<span style="font-size:15px">/90</span></div><div class="vunit">mmHg</div><div class="vbase">Baseline 150/88 · <span class="bdiff nm">+5</span></div><canvas class="spark" id="spBP"></canvas></div>
+    <div class="vc ok" id="vc_temp"><div class="vlabel">Body Temp <span>🌡️</span></div><div class="vval" id="vTemp">37.1</div><div class="vunit">°C · baseline 36.6</div><div class="vbase"><span class="bdiff up" id="dTemp">+0.5°C</span> จาก personal baseline</div><canvas class="spark" id="spTemp"></canvas></div>
+    <div class="vc ok" id="vc_rr"><div class="vlabel">Resp. Rate <span>💨</span></div><div class="vval" id="vRR">19</div><div class="vunit">breaths/min</div><div class="vbase">Baseline 20 · <span class="bdiff nm">-1</span></div><canvas class="spark" id="spRR"></canvas></div>
+    <div class="vc w" id="vc_pos"><div class="vlabel">Position Time <span>🛏️</span></div><div class="vval" id="vPos">1h 42m</div><div class="vunit" id="vPosLbl">ตะแคงขวา</div><div class="vbase"><span class="bdiff up">⚠ ใกล้ 2h threshold</span></div><canvas class="spark" id="spPos"></canvas></div>
+    <div class="vc ok" id="vc_urine"><div class="vlabel">Urine Output <span>💧</span></div><div class="vval" id="vUrine">0.6</div><div class="vunit">ml/kg/hr · target ≥0.5</div><div class="vbase"><span class="bdiff nm">✓ adequate</span></div><canvas class="spark" id="spUrine"></canvas></div>
+    <div class="vc ok" id="vc_pain"><div class="vlabel">Pain Score <span>😣</span></div><div class="vval" id="vPain">2</div><div class="vunit">/10 · micro-expression AI</div><div class="vbase"><span class="bdiff nm" id="painLbl">Low pain</span></div><canvas class="spark" id="spPain"></canvas></div>
+  </div>
+
+  <div class="sgrid">
+    <div class="panel"><div class="ph"><div class="pt">🤖 AGI Recommendations</div><div style="font-size:10px;color:var(--muted);">รอ Doctor Approve</div></div><div class="pb" id="alertsBox"></div></div>
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="panel">
+        <div class="ph"><div class="pt">🛏️ Bed Position</div><div class="ptimer" id="posTimer">1:42:15</div></div>
+        <div style="padding:8px 12px;">
+          <div class="bedmap">
+            <svg id="bedSvg" viewBox="0 0 300 148" xmlns="http://www.w3.org/2000/svg">
+              <rect x="18" y="52" width="264" height="62" rx="8" fill="#1a2535" stroke="#2a3a50" stroke-width="1.5"/>
+              <rect x="23" y="55" width="254" height="56" rx="6" fill="#0f1e30"/>
+              <g id="patBody" transform="translate(150,83) rotate(-15)">
+                <ellipse cx="0" cy="0" rx="54" ry="21" fill="#1e4060" stroke="#00aaff" stroke-width="1" opacity=".85"/>
+                <circle cx="68" cy="-3" r="15" fill="#1e4060" stroke="#00aaff" stroke-width="1" opacity=".85"/>
+                <ellipse id="pZone" cx="-28" cy="17" rx="12" ry="7" fill="rgba(255,176,32,0.5)" opacity=".8"/>
+                <ellipse id="pCore" cx="-28" cy="17" rx="6" ry="3.5" fill="rgba(255,71,87,0.7)"/>
+              </g>
+              <text x="20" y="46" font-size="8" fill="#6B7A96" font-family="monospace">HEAD</text>
+              <text x="264" y="46" font-size="8" fill="#6B7A96" font-family="monospace" text-anchor="end">FOOT</text>
+              <line x1="18" y1="114" x2="282" y2="106" stroke="#00D4AA" stroke-width="1.2" stroke-dasharray="4 3" opacity=".5"/>
+              <text id="angleLabel" x="284" y="108" font-size="8" fill="#00D4AA" font-family="monospace">25°</text>
+              <text id="pressLabel" x="85" y="138" font-size="7.5" fill="#FFB020" font-family="monospace">⚠ HIGH PRESSURE — sacrum</text>
+            </svg>
+            <div style="position:absolute;bottom:6px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-family:var(--mono);" id="posLabel">ตะแคงขวา · 25°</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ph"><div class="pt">📋 Braden Scale</div><div style="font-size:11px;color:var(--warn);font-family:var(--mono);" id="bradenLbl">13 · Medium Risk</div></div>
+        <div class="pb">
+          <div class="brow"><span class="bname">Sensory</span><div class="bbar"><div class="bfill" style="width:75%;background:var(--ok)"></div></div><span class="bsc" style="color:var(--ok)">3</span></div>
+          <div class="brow"><span class="bname">Moisture</span><div class="bbar"><div class="bfill" style="width:50%;background:var(--warn)"></div></div><span class="bsc" style="color:var(--warn)">2</span></div>
+          <div class="brow"><span class="bname">Activity</span><div class="bbar"><div class="bfill" style="width:25%;background:var(--danger)"></div></div><span class="bsc" style="color:var(--danger)">1</span></div>
+          <div class="brow"><span class="bname">Mobility</span><div class="bbar"><div class="bfill" style="width:50%;background:var(--warn)"></div></div><span class="bsc" style="color:var(--warn)">2</span></div>
+          <div class="brow"><span class="bname">Nutrition</span><div class="bbar"><div class="bfill" style="width:75%;background:var(--ok)"></div></div><span class="bsc" style="color:var(--ok)">3</span></div>
+          <div class="brow"><span class="bname">Friction</span><div class="bbar"><div class="bfill" style="width:66%;background:var(--warn)"></div></div><span class="bsc" style="color:var(--warn)">2</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel"><div class="ph"><div class="pt">📅 AGI Event Log วันนี้</div></div>
+    <div class="pb"><div style="display:grid;grid-template-columns:1fr 1fr;gap:0 22px;">
+      <div class="tli"><div class="tldot" style="background:var(--ok)"></div><div class="tltime">08:12</div><div>พลิกตัวซ้าย — Doctor approved · ดำเนินการโดย Device</div></div>
+      <div class="tli"><div class="tldot" style="background:var(--warn)"></div><div class="tltime">11:42</div><div>HR +35% จาก personal baseline — alert ส่งหมอ</div></div>
+      <div class="tli"><div class="tldot" style="background:var(--ok)"></div><div class="tltime">09:30</div><div>SpO₂ 89% → ปรับ O₂ 2L/min · approved</div></div>
+      <div class="tli"><div class="tldot" style="background:var(--ok)"></div><div class="tltime">12:00</div><div>Amlodipine 5mg · Atorvastatin 20mg confirmed</div></div>
+      <div class="tli"><div class="tldot" style="background:var(--accent2)"></div><div class="tltime">10:15</div><div>ยกหัวเตียง 30° ก่อนให้อาหาร NG tube</div></div>
+      <div class="tli"><div class="tldot" style="background:var(--warn)"></div><div class="tltime">13:38</div><div>⚠ Pressure zone — รอ Doctor approval</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- CONTROLS -->
+<div class="controls">
+  <div class="ctrl-title">🎮 Interactive Controls</div>
+  <div class="agi-status" id="agiStatus">
+    <div class="agi-dot" id="agiDot"></div>
+    <div><div class="agi-label" id="agiLabel">AGI MONITORING</div><div style="font-size:11px;color:var(--muted);" id="agiMsg">ระบบทำงานปกติ · 12 parameters</div></div>
+  </div>
+
+  <div class="ctrl-group">
+    <div class="cgt">📊 ปรับ Vital Signs (real-time)</div>
+    <div class="slider-row"><div class="slider-label">Heart Rate <span id="lHR" class="w">92 bpm</span></div><input type="range" id="sHR" min="30" max="150" value="92" oninput="uv('hr',this.value)"></div>
+    <div class="slider-row"><div class="slider-label">SpO₂ <span id="lSpo2" class="ok">91 %</span></div><input type="range" id="sSpo2" min="70" max="100" value="91" oninput="uv('spo2',this.value)"></div>
+    <div class="slider-row"><div class="slider-label">Systolic BP <span id="lBP" class="w">155 mmHg</span></div><input type="range" id="sBP" min="60" max="220" value="155" oninput="uv('bp',this.value)"></div>
+    <div class="slider-row"><div class="slider-label">Body Temp <span id="lTemp" class="ok">37.1 °C</span></div><input type="range" id="sTemp" min="340" max="420" value="371" oninput="uv('temp',this.value)"></div>
+    <div class="slider-row"><div class="slider-label">Resp. Rate <span id="lRR" class="ok">19 /min</span></div><input type="range" id="sRR" min="4" max="40" value="19" oninput="uv('rr',this.value)"></div>
+    <div class="slider-row"><div class="slider-label">Pain Score <span id="lPain" class="ok">2 /10</span></div><input type="range" id="sPain" min="0" max="10" value="2" oninput="uv('pain',this.value)"></div>
+  </div>
+
+  <div class="ctrl-group">
+    <div class="cgt">🛏️ เปลี่ยนท่านอน</div>
+    <div class="pos-grid" id="posGrid">
+      <button class="pos-btn" onclick="chgPos('supine',this)">🔼 นอนหงาย</button>
+      <button class="pos-btn active" onclick="chgPos('right',this)">➡️ ตะแคงขวา</button>
+      <button class="pos-btn" onclick="chgPos('left',this)">⬅️ ตะแคงซ้าย</button>
+      <button class="pos-btn" onclick="chgPos('prone',this)">🔽 นอนคว่ำ</button>
+    </div>
+    <div style="margin-top:8px;">
+      <div class="slider-label" style="margin-bottom:4px;">มุมหัวเตียง <span id="lAngle" class="ok">25°</span></div>
+      <input type="range" id="sAngle" min="0" max="45" value="25" oninput="chgAngle(this.value)">
+    </div>
+  </div>
+
+  <div class="ctrl-group">
+    <div class="cgt">⚡ จำลองสถานการณ์</div>
+    <button class="scenario-btn" onclick="scenario('sepsis')">🦠 Sepsis Early Warning</button>
+    <button class="scenario-btn" onclick="scenario('spo2drop')">😮‍💨 SpO₂ Drop (COPD)</button>
+    <button class="scenario-btn" onclick="scenario('htn')">🩺 Hypertensive Crisis</button>
+    <button class="scenario-btn" onclick="scenario('pressure')">⚠️ Pressure Injury Risk</button>
+    <button class="scenario-btn" onclick="scenario('fall')">🚨 Bed Exit / Fall Risk</button>
+    <button class="scenario-btn" onclick="scenario('stable')">✅ Reset — All Normal</button>
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <div style="font-size:28px;margin-bottom:10px;" id="mIcon">🛏️</div>
+    <h3>Doctor Approval Required</h3>
+    <p>AGI ตรวจพบความเสี่ยงและแนะนำ action ด้านล่าง กรุณา review ก่อน approve</p>
+    <div class="modal-detail" id="mDetail"></div>
+    <div class="mbtns">
+      <button class="btn btn-a" onclick="doApprove()">✓ Approve & Execute</button>
+      <button class="btn btn-deny" onclick="closeModal()">✕ Deny</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toastText">Done</span></div>
+
+<script>
+const S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false};
+const BL={hr:68,spo2:90,bp:150,temp:36.6,rr:20};
+
+// Clock
+setInterval(()=>{const n=new Date();document.getElementById('clock').textContent=n.toLocaleTimeString('th-TH',{hour12:false});},1000);
+
+// Pos Timer
+setInterval(()=>{
+  S.posSec++;
+  const h=Math.floor(S.posSec/3600),m=Math.floor((S.posSec%3600)/60),s=S.posSec%60;
+  document.getElementById('posTimer').textContent=`${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('vPos').textContent=`${h}h ${m}m`;
+  if(S.posSec>7200&&!S._pressAlerted){S._pressAlerted=true;addLog('warn','⚠ Position 2h exceeded — reposition needed');toast('⚠ AGI: ถึงเวลาพลิกตัว','warn');checkAGI();}
+},1000);
+
+// ECG
+const ec=document.getElementById('ecgC');ec.width=ec.parentElement.offsetWidth||700;ec.height=56;
+const ectx=ec.getContext('2d');let eo=0;
+function drawECG(){
+  const W=ec.width,H=56;ectx.clearRect(0,0,W,H);
+  ectx.strokeStyle='rgba(46,213,115,0.1)';ectx.lineWidth=1;
+  for(let x=0;x<W;x+=40){ectx.beginPath();ectx.moveTo(x,0);ectx.lineTo(x,H);ectx.stroke();}
+  for(let y=0;y<H;y+=14){ectx.beginPath();ectx.moveTo(0,y);ectx.lineTo(W,y);ectx.stroke();}
+  const sp=S.hr>100?4:S.hr<50?1.5:3;
+  const col=S.hr>120?'#FF4757':S.hr>100?'#FFB020':'#2ED573';
+  ectx.strokeStyle=col;ectx.lineWidth=1.5;ectx.shadowColor=col;ectx.shadowBlur=4;
+  ectx.beginPath();
+  for(let x=0;x<W;x++){
+    const per=40*(68/Math.max(S.hr,30)),t=(x+eo)/per,c=t%(Math.PI*2);
+    let y;
+    if(c<0.3)y=H/2+Math.sin(c*10)*3;
+    else if(c<0.6)y=H/2-Math.sin((c-.3)*20)*25;
+    else if(c<0.9)y=H/2+Math.sin((c-.6)*20)*8;
+    else if(c<1.4)y=H/2+Math.sin((c-.9)*6)*9;
+    else y=H/2+Math.sin((c-1.4)*3)*2;
+    x===0?ectx.moveTo(x,y):ectx.lineTo(x,y);
+  }
+  ectx.stroke();ectx.shadowBlur=0;eo+=sp;requestAnimationFrame(drawECG);
+}
+drawECG();
+
+// Sparks
+const spk={};
+function initSp(id,b,r,c){const d=[];for(let i=0;i<30;i++)d.push(b+(Math.random()-.5)*r);spk[id]={d,b,r,c};drawSp(id);}
+function drawSp(id){
+  const cv=document.getElementById(id);if(!cv)return;
+  cv.width=cv.parentElement.offsetWidth||180;cv.height=24;
+  const {d,c}=spk[id];const x2=cv.getContext('2d');x2.clearRect(0,0,cv.width,24);
+  const mn=Math.min(...d),mx=Math.max(...d),rng=mx-mn||1;
+  x2.strokeStyle=c;x2.lineWidth=1.5;x2.shadowColor=c;x2.shadowBlur=3;
+  x2.beginPath();d.forEach((v,i)=>{const x=(i/(d.length-1))*cv.width,y=20-((v-mn)/rng)*17;i===0?x2.moveTo(x,y):x2.lineTo(x,y);});
+  x2.stroke();x2.shadowBlur=0;
+}
+function updSp(){
+  const map={spHR:'hr',spSpo2:'spo2',spBP:'bp',spTemp:'temp',spRR:'rr',spPain:'pain'};
+  Object.keys(spk).forEach(id=>{
+    const sd=spk[id];let cur=sd.b;if(map[id])cur=S[map[id]];
+    sd.d.shift();sd.d.push(cur+(Math.random()-.5)*sd.r);drawSp(id);
+  });
+}
+initSp('spHR',92,5,'#FFB020');initSp('spSpo2',91,1.5,'#2ED573');initSp('spBP',155,4,'#FFB020');
+initSp('spTemp',37.1,.15,'#2ED573');initSp('spRR',19,2,'#2ED573');initSp('spPos',60,3,'#FFB020');
+initSp('spUrine',.6,.08,'#2ED573');initSp('spPain',2,.5,'#2ED573');
+setInterval(updSp,1400);
+
+// Status logic
+function getStatus(k,v){
+  if(k==='hr'){if(v<40||v>130)return'd';if(v<50||v>110||(v-BL.hr)/BL.hr>.3)return'w';return'ok';}
+  if(k==='spo2'){if(v<88)return'd';if(v<90||v>99)return'w';return'ok';}
+  if(k==='bp'){if(v<80||v>180)return'd';if(v>165||v<90)return'w';return'ok';}
+  if(k==='temp'){if(v<35||v>39)return'd';if(v>38||v<36)return'w';return'ok';}
+  if(k==='rr'){if(v<8||v>30)return'd';if(v<10||v>25)return'w';return'ok';}
+  if(k==='pain'){if(v>=7)return'd';if(v>=4)return'w';return'ok';}
+  return'ok';
+}
+const unitsMap={hr:'bpm',spo2:'%',bp:'mmHg',temp:'°C',rr:'/min',pain:'/10'};
+const labelIds={hr:'lHR',spo2:'lSpo2',bp:'lBP',temp:'lTemp',rr:'lRR',pain:'lPain'};
+const valIds={hr:'vHR',spo2:'vSpo2',bp:'vBP',temp:'vTemp',rr:'vRR',pain:'vPain'};
+const sliderIds={hr:'sHR',spo2:'sSpo2',bp:'sBP',temp:'sTemp',rr:'sRR',pain:'sPain'};
+
+function renderVital(k,v){
+  const st=getStatus(k,v);
+  const vc=document.getElementById(`vc_${k}`);if(vc)vc.className=`vc ${st}`;
+  const ve=document.getElementById(valIds[k]);
+  if(ve){if(k==='temp')ve.textContent=v.toFixed(1);else if(k==='bp')ve.innerHTML=`${v}<span style="font-size:15px">/90</span>`;else ve.textContent=Math.round(v);}
+  const le=document.getElementById(labelIds[k]);
+  if(le){le.textContent=`${k==='temp'?v.toFixed(1):Math.round(v)} ${unitsMap[k]}`;le.className=st;}
+  const se=document.getElementById(sliderIds[k]);
+  if(se)se.className=st==='d'?'danger-s':st==='w'?'warn-s':'';
+}
+
+function uv(k,raw){
+  let v=parseFloat(raw);if(k==='temp')v=v/10;
+  S[k]=v;renderVital(k,v);
+  if(k==='hr')document.getElementById('ecgHR').textContent=`${Math.round(v)} bpm`;
+  checkAGI();
+}
+
+// Positions
+const posC={supine:{lbl:'นอนหงาย',rot:0,pr:false},right:{lbl:'ตะแคงขวา',rot:-15,pr:true},left:{lbl:'ตะแคงซ้าย',rot:15,pr:true},prone:{lbl:'นอนคว่ำ',rot:5,pr:false}};
+function chgPos(p,el){
+  S.pos=p;S.posSec=0;S._pressAlerted=false;
+  document.querySelectorAll('.pos-btn').forEach(b=>b.classList.remove('active'));
+  if(el)el.classList.add('active');
+  const c=posC[p];
+  document.getElementById('patBody').setAttribute('transform',`translate(150,83) rotate(${c.rot})`);
+  document.getElementById('vPosLbl').textContent=c.lbl;
+  const op=c.pr?'.8':'0';
+  document.getElementById('pZone').style.opacity=op;
+  document.getElementById('pCore').style.opacity=op;
+  document.getElementById('pressLabel').style.opacity=op;
+  document.getElementById('posLabel').textContent=`${c.lbl} · ${S.angle}°`;
+  addLog('info',`เปลี่ยนท่า: ${c.lbl}`);
+  toast(`🛏️ ท่าใหม่: ${c.lbl}`,'ok');
+  checkAGI();
+}
+function chgAngle(v){
+  S.angle=parseInt(v);
+  document.getElementById('lAngle').textContent=`${v}°`;
+  document.getElementById('angleLabel').textContent=`${v}°`;
+  document.getElementById('posLabel').textContent=`${posC[S.pos].lbl} · ${v}°`;
+}
+
+// AGI CHECK
+function checkAGI(){
+  const alerts=[];
+  const {hr,spo2,bp,temp,rr,pain,pos}=S;
+  if(spo2<88)alerts.push({t:'d',icon:'😮‍💨',title:'SpO₂ วิกฤต < 88%',desc:`SpO₂ ${spo2}% ต่ำกว่า safe threshold สำหรับ COPD · ปล่อยทิ้งไว้เสี่ยง respiratory failure`,action:'เพิ่ม O₂ supplement 4L/min',key:'o2'});
+  else if(spo2<90)alerts.push({t:'w',icon:'🫁',title:`SpO₂ ${spo2}% — ต่ำกว่า target range`,desc:'Target 90–92% สำหรับ COPD · ติดตามอย่างใกล้ชิด',action:null,key:'spo2w'});
+  const hrDev=(hr-BL.hr)/BL.hr;
+  if(hr>130)alerts.push({t:'d',icon:'❤️',title:'Tachycardia รุนแรง > 130 bpm',desc:`HR ${hr} · เสี่ยง Sepsis / Arrhythmia / Pain · ต้องการ ECG 12-lead`,action:'ECG 12-lead + IV access',key:'tachy'});
+  else if(hr<40)alerts.push({t:'d',icon:'💔',title:'Bradycardia รุนแรง < 40 bpm',desc:`HR ${hr} · เสี่ยง cardiac arrest`,action:'เรียกทีมด่วน',key:'brady'});
+  else if(hrDev>.3)alerts.push({t:'w',icon:'📈',title:`HR +${Math.round(hrDev*100)}% จาก personal baseline`,desc:`HR ${hr} bpm · baseline คนนี้ ${BL.hr} bpm · deviation >${Math.round(hrDev*100)}% เสี่ยง early sepsis / pain`,action:null,key:'hrdev'});
+  if(temp>=38.5)alerts.push({t:'d',icon:'🌡️',title:`Temp ${temp.toFixed(1)}°C — Sepsis Risk`,desc:`Baseline ${BL.temp}°C · +${(temp-BL.temp).toFixed(1)}°C · HR สูงด้วย → qSOFA positive · ตรวจ Blood Culture ด่วน`,action:'Blood Culture + CBC + Lactate',key:'sepsis'});
+  else if(temp>38)alerts.push({t:'w',icon:'🌡️',title:`Temp ${temp.toFixed(1)}°C — สูงกว่า personal baseline`,desc:`Baseline ${BL.temp}°C · +${(temp-BL.temp).toFixed(1)}°C · ติดตาม`,action:null,key:'tempw'});
+  if(bp>180)alerts.push({t:'d',icon:'🩺',title:'Hypertensive Crisis > 180 mmHg',desc:`BP ${bp} mmHg · เสี่ยง stroke / organ damage · ต้องการ IV antihypertensive ทันที`,action:'IV Labetalol / Nicardipine',key:'htn'});
+  else if(bp<80)alerts.push({t:'d',icon:'🩺',title:`Hypotension — BP ${bp} mmHg`,desc:'BP ต่ำวิกฤต · เสี่ยง septic shock · IV fluid bolus ทันที',action:'IV NSS 500ml bolus',key:'shock'});
+  if(rr<8||rr>30)alerts.push({t:'d',icon:'💨',title:`Respiratory ${rr<8?'Failure':'Distress'}`,desc:`RR ${rr}/min · ${rr<8?'น้อยเกิน = CO2 คั่ง':'มากเกิน = ต้องการ oxygen support'}`,action:'ประเมิน airway + O₂ mask',key:'rr'});
+  if(pain>=7)alerts.push({t:'d',icon:'😣',title:`Pain Score ${pain}/10 — รุนแรง`,desc:'Micro-expression AI ตรวจพบความเจ็บปวดรุนแรง · ผู้ป่วยอาจสื่อสารไม่ได้',action:'Morphine 2mg IV PRN',key:'pain'});
+  else if(pain>=4)alerts.push({t:'w',icon:'😣',title:`Pain Score ${pain}/10`,desc:'ความเจ็บปวดระดับกลาง · พิจารณา analgesic',action:null,key:'painw'});
+  if((pos==='right'||pos==='left')&&S.posSec>5400)alerts.push({t:'w',icon:'🛏️',title:'แรงกดสะสม — ควรพลิกตัว',desc:`นอน ${posC[pos].lbl} ${Math.floor(S.posSec/60)} นาที · เสี่ยง Pressure Injury Grade I บริเวณกระดูกก้นกบ`,action:'ปรับท่านอน (motor bed)',key:'repos'});
+  if(alerts.length===0)alerts.push({t:'ok-a',icon:'✅',title:'ทุก Parameter อยู่ใน target range',desc:`AGI ตรวจสอบ 12 parameters · Personal baseline tracking active · ไม่พบความผิดปกติ`,action:null,key:'ok'});
+  renderAlerts(alerts);updateAGIStatus(alerts);updateRiskScores();
+}
+
+function renderAlerts(alerts){
+  document.getElementById('alertsBox').innerHTML=alerts.map(a=>`
+    <div class="aitem ${a.t}">
+      <div class="aicon">${a.icon}</div>
+      <div class="ac">
+        <div class="atitle">${a.title}</div>
+        <div class="adesc">${a.desc}</div>
+        ${a.action&&a.t!=='ok-a'?`<div class="abtn-row">
+          <button class="btn btn-a" onclick="openModal('${a.key}','${a.icon}','${a.title.replace(/'/g,"\\'")}','${a.action.replace(/'/g,"\\'")}')">✓ Approve: ${a.action}</button>
+          <button class="btn btn-deny" onclick="this.closest('.aitem').style.opacity='.4'">Deny</button>
+        </div>`:''}
+        ${!a.action&&a.t!=='ok-a'?`<div class="atime">🔔 ต้องการหมอดูแล — ไม่สามารถ auto-execute ได้</div>`:''}
+      </div>
+    </div>`).join('');
+}
+
+function updateAGIStatus(alerts){
+  const hasD=alerts.some(a=>a.t==='d'),hasW=alerts.some(a=>a.t==='w');
+  const dot=document.getElementById('agiDot'),lbl=document.getElementById('agiLabel'),msg=document.getElementById('agiMsg'),st=document.getElementById('agiStatus');
+  if(hasD){st.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:12px;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.3)';dot.style.background='var(--danger)';lbl.style.color='var(--danger)';lbl.textContent='⚠ CRITICAL';msg.textContent=`${alerts.filter(a=>a.t==='d').length} critical — ต้องการหมอทันที`;}
+  else if(hasW){st.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:12px;background:rgba(255,176,32,.06);border:1px solid rgba(255,176,32,.25)';dot.style.background='var(--warn)';lbl.style.color='var(--warn)';lbl.textContent='⚡ WARNING';msg.textContent=`${alerts.filter(a=>a.t==='w').length} parameter ผิดปกติ`;}
+  else{st.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:9px;margin-bottom:12px;font-size:12px;background:rgba(0,212,170,.06);border:1px solid rgba(0,212,170,.2)';dot.style.background='var(--accent)';lbl.style.color='var(--accent)';lbl.textContent='AGI MONITORING';msg.textContent='ระบบปกติ · 12 parameters';}
+}
+
+function updateRiskScores(){
+  const n2=Math.min(9,Math.round((S.rr<12||S.rr>24?2:0)+(S.spo2<92?3:S.spo2<94?1:0)+(S.hr>130||S.hr<40?3:S.hr>110||S.hr<50?1:0)+(S.temp>=38.5?2:S.temp<36?3:0)+(S.bp>180||S.bp<90?3:S.bp>160?1:0)));
+  document.getElementById('news2Score').textContent=n2;
+  document.getElementById('news2Rb').className=`rb ${n2>=5?'hi':n2>=3?'med':'low'}`;
+  const sep=S.hr>90&&S.temp>=38&&S.rr>22?'High':S.hr>80&&S.temp>37.5?'Med':'Low';
+  document.getElementById('sepsisRs').textContent=sep;
+  document.getElementById('sepsisRb').className=`rb ${sep==='High'?'hi':sep==='Med'?'med':'low'}`;
+}
+
+// Scenarios
+const scenarios={
+  sepsis:{hr:118,spo2:91,bp:92,temp:38.8,rr:26,pain:6,msg:'🦠 Sepsis — HR↑ Temp↑ BP↓ RR↑'},
+  spo2drop:{hr:96,spo2:85,bp:148,temp:37.0,rr:28,pain:3,msg:'😮‍💨 SpO₂ Drop 85% — COPD exacerbation'},
+  htn:{hr:82,spo2:92,bp:195,temp:37.2,rr:18,pain:4,msg:'🩺 Hypertensive Crisis — BP 195 mmHg'},
+  pressure:{hr:80,spo2:91,bp:150,temp:37.1,rr:18,pain:2,posSec:6600,msg:'⚠️ Pressure zone — 2h exceeded'},
+  fall:{hr:108,spo2:93,bp:145,temp:36.9,rr:20,pain:7,msg:'🚨 Bed exit + fall risk + pain spike'},
+  stable:{hr:72,spo2:93,bp:132,temp:36.8,rr:16,pain:1,msg:'✅ All vitals normalized — stable'}
+};
+function scenario(name){
+  const sc=scenarios[name];if(!sc)return;
+  Object.assign(S,{hr:sc.hr,spo2:sc.spo2,bp:sc.bp,temp:sc.temp,rr:sc.rr,pain:sc.pain});
+  if(sc.posSec)S.posSec=sc.posSec;
+  document.getElementById('sHR').value=sc.hr;
+  document.getElementById('sSpo2').value=sc.spo2;
+  document.getElementById('sBP').value=sc.bp;
+  document.getElementById('sTemp').value=Math.round(sc.temp*10);
+  document.getElementById('sRR').value=sc.rr;
+  document.getElementById('sPain').value=sc.pain;
+  ['hr','spo2','bp','temp','rr','pain'].forEach(k=>renderVital(k,S[k]));
+  document.getElementById('ecgHR').textContent=`${sc.hr} bpm`;
+  checkAGI();
+  addLog(name==='stable'?'ok':'warn',sc.msg);
+  toast(sc.msg,name==='stable'?'ok':'warn');
+}
+
+// Modal
+function openModal(key,icon,title,action){
+  S._pa={key,action};
+  document.getElementById('mIcon').textContent=icon;
+  document.getElementById('mDetail').innerHTML=`<strong>Action:</strong> ${action}<br><strong>Patient:</strong> นาย สมชาย ใจดี · 74 ปี<br><strong>HR:</strong> ${Math.round(S.hr)} bpm · <strong>SpO₂:</strong> ${S.spo2}% · <strong>BP:</strong> ${S.bp} mmHg · <strong>Temp:</strong> ${S.temp.toFixed(1)}°C<br><strong>Detected by:</strong> AGI personal baseline deviation engine<br><strong>Execution:</strong> Device จะดำเนินการอัตโนมัติหลัง approve`;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+function doApprove(){
+  const a=S._pa;closeModal();
+  toast(`✓ Approved — ${a.action}`,'ok');
+  addLog('ok',`✓ Doctor approved: ${a.action}`);
+  if(a.key==='o2'){S.spo2=Math.min(94,S.spo2+3);renderVital('spo2',S.spo2);document.getElementById('sSpo2').value=S.spo2;}
+  if(a.key==='repos'){chgPos('supine',document.querySelector('.pos-btn'));}
+  if(a.key==='sepsis'){S.temp=Math.max(37.5,S.temp-.5);renderVital('temp',S.temp);document.getElementById('sTemp').value=Math.round(S.temp*10);}
+  checkAGI();
+}
+
+// Log
+function addLog(type,msg){
+  const n=new Date(),t=`${String(n.getHours()).padStart(2,'0')}:${String(n.getMinutes()).padStart(2,'0')}`;
+  const cls={ok:'log-ok',warn:'log-warn',danger:'log-d',info:'log-info'}[type]||'log-info';
+  const box=document.getElementById('logbox'),line=document.createElement('div');
+  line.className='log-line';
+  line.innerHTML=`<span class="log-time">${t}</span><span class="${cls}">${msg}</span>`;
+  box.insertBefore(line,box.firstChild);
+}
+
+// Toast
+function toast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  document.getElementById('toastText').textContent=msg;
+  t.className=`toast show ${type}-t`;
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// Patient switch
+function switchP(i){
+  document.querySelectorAll('.pcard').forEach((c,j)=>c.classList.toggle('active',i===j));
+  const msgs=['เปิดข้อมูล นาย สมชาย ใจดี','⚠ นาง มาลี — SpO₂ 87% Critical!','เปิดข้อมูล นาย วิชัย ศรีสุข'];
+  toast(msgs[i],i===1?'warn':'ok');
+}
+
+checkAGI();
+</script>
+</body>
+</html>
