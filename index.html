@@ -889,12 +889,13 @@ function getDoctorActions(p){
     return done();
   }
   if(p.scenario==='htn'){
-    add('d',`BP ${p.bp}/${p.dia} · hypertensive crisis`,'BP/MAP สูงกว่าค่า personal baseline มาก','เป้าหมายคัดแยก urgency vs emergency; ถ้า encephalopathy ลด MAP 20-25%','ลด BP อย่างควบคุม ไม่ลดเร็วเกินไปถ้าไม่ใช่ emergency',[
-      A('ยืนยัน BP และคัดแยกทันที: วัดซ้ำด้วยเทคนิคถูกต้อง เทียบ personal baseline และแจ้งทีมรักษาเมื่อ ≥180/110','฿0-150','96%'),
-      A('ค้นหา acute organ damage: neuro deficit, chest pain, dyspnea/SpO₂ drop, urine ลด; ส่ง Cr/electrolyte, urine, ECG, CXR, troponin หรือ CT/MRI ตามบริบท','฿900-9,500','92%'),
-      A('ถ้าเป็น hypertensive emergency ให้รักษาใน monitored setting ด้วย IV antihypertensive ที่ปรับขนาดได้ตาม organ damage','฿1,500-8,500','90%'),
-      A('ถ้าสงสัย hypertensive encephalopathy ให้ตั้งเป้าลด MAP ประมาณ 20-25% ด้วย nicardipine/labetalol; ถ้า stroke ใช้ pathway stroke แยก','฿1,200-7,500','88%'),
-      A('ถ้าเป็น PSH/urgency ห้ามลด BP เร็วเกินไป: แก้ pain/stress/anxiety/ขาดยา แล้วลด BP ค่อย ๆ ใน 24-48 ชม.','฿120-1,800','86%')
+    const map=Math.round((p.bp+(2*p.dia))/3);
+    add('d',`BP ${p.bp}/${p.dia} · MAP≈${map} · hypertensive crisis`,'BP สูงรุนแรง ต้องพิสูจน์ว่าไม่มี acute end-organ damage','เป้าหมายแยก hypertensive emergency vs PSH/urgency และเลือกเป้าลด BP ตาม organ damage','คุม BP แบบ monitored/titrated ถ้า emergency; ถ้าไม่มี organ damage ลดค่อย ๆ ใน 24-48 ชม.',[
+      A('ยืนยันว่าเป็น Hypertensive Crisis จริงและประเมินความเร่งด่วนทันที: วัด BP ซ้ำด้วย cuff ที่เหมาะสม เทียบ personal baseline คำนวณ MAP ดู trend HR/RR/SpO₂/urine output และอาการร่วม; ถ้า ≥180/110 หรือเพิ่มเร็วมากให้ถือว่าเสี่ยงสูงจนกว่าจะพิสูจน์ว่าไม่มี organ damage','฿0-250','96%'),
+      A('ค้นหา acute end-organ damage ก่อนเลือกวิธีลดความดัน: ตรวจ stroke/เลือดออกในสมอง, acute heart failure/pulmonary edema, ACS, acute aortic syndrome, acute renal failure ด้วย neuro exam, ECG, cardiac marker, CXR, creatinine/electrolyte, urine test และ CT/MRI ตามข้อบ่งชี้','฿900-12,500','92%'),
+      A('ถ้าเป็น Hypertensive Emergency ให้รักษาใน monitored setting และใช้ IV drug ที่ปรับขนาดได้: ลดความดันทันทีเพื่อป้องกัน organ damage เพิ่ม ใช้ยาฉีด IV ที่ออกฤทธิ์เร็วและ titrate ได้ พร้อมติดตาม BP/MAP และประเมิน organ damage ซ้ำต่อเนื่อง','฿1,500-9,500','90%'),
+      A('เลือกเป้าหมายและยาตามอวัยวะที่เสียหาย: encephalopathy/malignant HT ลด MAP 20-25% พิจารณา nicardipine หรือ labetalol; ACS เป้าหมาย SBP <140 พิจารณา nitroglycerine/labetalol; acute HF/pulmonary edema เป้าหมาย SBP <140 พิจารณา nitroglycerine หรือ nitroprusside และ loop diuretics; acute aortic disease เป้าหมาย SBP <120 และ HR <60 อาจใช้ esmolol/labetalol/nicardipine/nitroglycerine; acute stroke ให้ตาม pathway stroke แยก','฿1,200-12,000','88%'),
+      A('ถ้าไม่มี organ damage ให้จัดการแบบ PSH/urgency และไม่ลดเร็วเกินไป: ค้นหา trigger เช่น ปวดมาก เครียด/วิตกกังวล ยาหรือสารที่เพิ่ม BP ขาดยาลดความดัน หรือยังไม่เคยได้ยา; พัก ฝึกหายใจ ใช้ยาแก้ปวด/ยาลดกังวลตามเหมาะสม และค่อย ๆ ลด BP ภายใน 24-48 ชม. พร้อมปรับยาระยะต่อเนื่อง','฿120-2,500','86%')
     ]);
     return done();
   }
