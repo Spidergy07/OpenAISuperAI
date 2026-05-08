@@ -873,6 +873,41 @@ function getDoctorActions(p){
   const issues=[];
   const A=(text,cost,confidence)=>({text,cost,confidence});
   const add=(type,param,why,normal,direction,actions)=>issues.push({type,param,why,normal,direction,actions});
+  const done=()=>{
+    const priority=issues.some(x=>x.type==='d')?'d':issues.some(x=>x.type==='w')?'w':'ok';
+    const headline=priority==='d'?'ต้องให้แพทย์ review ทันที':priority==='w'?'ควรติดตามและสั่งแผนป้องกัน':'ไม่ต้องมี intervention เร่งด่วน';
+    return {priority,headline,issues};
+  };
+  if(p.scenario==='spo2drop'){
+    add('d',`SpO₂ ${p.spo2}% · RR ${p.rr}/min`,'SpO₂ drop + respiratory compensation','เป้าหมาย SpO₂ ≥95% ทั่วไป / 88-92% COPD','เพิ่ม oxygenation และลด work of breathing',[
+      A('เปิด pathway “Abnormal Airway/Breathing”: ประเมิน RR, HR, BP/MAP, Temp, conscious, สีผิว, probe/สาย O₂ และแจ้ง in-charge/แพทย์','฿0-250','96%'),
+      A('จัดท่าและเปิดทางเดินหายใจ: ศีรษะสูง 30-45°, เปลี่ยนท่า/ตะแคงตามข้อห้าม, clear airway, suction ถ้ามีข้อบ่งชี้','฿0-450','93%'),
+      A('ให้ออกซิเจนและ escalate support: nasal cannula/mask with bag; ถ้าเหนื่อยมากให้พิจารณา HFNC/NIV/intubation','฿250-8,500','91%'),
+      A('สืบค้น pneumonia/aspiration: CBC, CXR, culture ตามความรุนแรง และพิจารณา antibiotic ตาม CPG เมื่อสงสัยติดเชื้อ','฿900-4,800','86%'),
+      A('ประเมิน sepsis/shock หากมี Temp ผิดปกติ, HR/RR สูง, BP/MAP ต่ำ หรือ urine ลด: ส่ง lactate/culture, fluid/vasopressor ตามข้อบ่งชี้','฿1,200-6,500','88%')
+    ]);
+    return done();
+  }
+  if(p.scenario==='htn'){
+    add('d',`BP ${p.bp}/${p.dia} · hypertensive crisis`,'BP/MAP สูงกว่าค่า personal baseline มาก','เป้าหมายคัดแยก urgency vs emergency; ถ้า encephalopathy ลด MAP 20-25%','ลด BP อย่างควบคุม ไม่ลดเร็วเกินไปถ้าไม่ใช่ emergency',[
+      A('ยืนยัน BP และคัดแยกทันที: วัดซ้ำด้วยเทคนิคถูกต้อง เทียบ personal baseline และแจ้งทีมรักษาเมื่อ ≥180/110','฿0-150','96%'),
+      A('ค้นหา acute organ damage: neuro deficit, chest pain, dyspnea/SpO₂ drop, urine ลด; ส่ง Cr/electrolyte, urine, ECG, CXR, troponin หรือ CT/MRI ตามบริบท','฿900-9,500','92%'),
+      A('ถ้าเป็น hypertensive emergency ให้รักษาใน monitored setting ด้วย IV antihypertensive ที่ปรับขนาดได้ตาม organ damage','฿1,500-8,500','90%'),
+      A('ถ้าสงสัย hypertensive encephalopathy ให้ตั้งเป้าลด MAP ประมาณ 20-25% ด้วย nicardipine/labetalol; ถ้า stroke ใช้ pathway stroke แยก','฿1,200-7,500','88%'),
+      A('ถ้าเป็น PSH/urgency ห้ามลด BP เร็วเกินไป: แก้ pain/stress/anxiety/ขาดยา แล้วลด BP ค่อย ๆ ใน 24-48 ชม.','฿120-1,800','86%')
+    ]);
+    return done();
+  }
+  if(p.scenario==='sepsis'){
+    add('d',`Temp ${p.temp.toFixed(1)}°C · HR ${p.hr} bpm`,'Early sepsis pattern จาก temp ผิดปกติ + tachycardia','เป้าหมาย MAP ≥65, SpO₂ adequate, urine ≥0.5 ml/kg/hr, lactate downtrend','เริ่ม sepsis bundle และคง perfusion',[
+      A('เจาะ serum lactate เพื่อประเมิน tissue hypoperfusion และใช้ติดตามความรุนแรงของ shock','฿500-1,500','94%'),
+      A('เก็บ hemoculture ก่อนให้ antibiotic หากทำได้ เพื่อระบุเชื้อและปรับยาในภายหลัง','฿600-1,800','91%'),
+      A('ให้ broad-spectrum IV antibiotic ภายใน 1 ชั่วโมงเมื่อเข้าเกณฑ์ sepsis/severe sepsis ตาม CPG','฿900-4,500','90%'),
+      A('ให้ IV fluid resuscitation เมื่อ BP/MAP ต่ำหรือสงสัย hypoperfusion และติดตาม response','฿250-1,600','88%'),
+      A('ให้ vasopressor เช่น norepinephrine หากให้สารน้ำเต็มที่แล้วยัง MAP <65 เพื่อคง perfusion อวัยวะสำคัญ','฿1,200-6,500','86%')
+    ]);
+    return done();
+  }
   if(p.spo2<88)add('d',`SpO₂ ${p.spo2}%`,'ต่ำกว่า safe threshold','เป้าหมาย 88-92% COPD / 92-96% ทั่วไป','เพิ่มค่า SpO₂',[A('จัดท่า high Fowler และเช็ก probe/สาย O₂','฿0-120','93%'),A('เพิ่ม O₂ support ตาม protocol','฿250-900','96%'),A('reassess SpO₂ ภายใน 5-10 นาที','฿0-120','91%'),A('พิจารณา ABG หาก SpO₂ ยังไม่ขึ้น','฿650-1,900','88%')]);
   else if(p.spo2<92)add('w',`SpO₂ ${p.spo2}%`,'ต่ำกว่า target ของผู้ป่วยกลุ่มนี้','เป้าหมาย 88-92% COPD / 92-96% ทั่วไป','เพิ่มค่า SpO₂',[A('ตรวจตำแหน่ง probe และ waveform','฿0-80','90%'),A('ปรับ O₂ ตาม protocol','฿250-700','89%'),A('ติดตาม SpO₂ ต่อเนื่อง 15 นาที','฿0-120','86%'),A('แจ้งแพทย์หากต้องเพิ่ม O₂ เกิน baseline','฿0-120','82%')]);
   if(p.hr>130)add('d',`HR ${p.hr} bpm`,'tachycardia รุนแรง','ปกติ 60-100 bpm','ลด HR / หา cause',[A('สั่ง ECG 12-lead','฿350-900','95%'),A('เปิด IV access และตรวจ electrolyte','฿350-1,200','90%'),A('ประเมิน sepsis / arrhythmia / pain เป็น cause','฿0-250','88%')]);
@@ -894,9 +929,7 @@ function getDoctorActions(p){
   if(p.fallRisk)add('d','Bed exit sensor','เสี่ยงลุกตกเตียง','เป้าหมาย no unassisted bed exit','ลด fall risk',[A('เรียกพยาบาลเข้า bedside','฿0-120','93%'),A('เปิด side rail และ bed alarm','฿0-120','91%'),A('ประเมิน delirium/toileting need','฿0-450','82%'),A('ย้าย call bell และของจำเป็นให้อยู่ในระยะเอื้อม','฿0-120','86%')]);
   if((p.pos==='right'||p.pos==='left')&&p.posSec>5400)add('w',`Position ${Math.floor(p.posSec/60)} min`,'แรงกดสะสมเกิน threshold','เป้าหมายเปลี่ยนท่าทุก ≤120 นาที','ลด pressure time',[A('สั่งพลิกตัวหรือ pressure relief','฿0-250','88%'),A('ตรวจผิวหนังบริเวณ sacrum/heel','฿0-250','84%'),A('ตั้ง timer รอบถัดไปไม่เกิน 120 นาที','฿0-100','86%'),A('บันทึกตำแหน่งใหม่และ pressure zone หลังพลิกตัว','฿0-120','82%')]);
   if(!issues.length)add('ok','All parameters','ยังไม่พบค่าผิดปกติ','อยู่ใน target range','คงค่า / monitor',[A('ติดตาม vital signs ตามรอบ','฿0-120','78%'),A('คง personal baseline monitoring','฿0-120','76%'),A('ทบทวนอีกครั้งหากมี alert ใหม่','฿0-120','74%'),A('ยืนยันว่าไม่มี pending doctor approval','฿0-120','72%')]);
-  const priority=issues.some(x=>x.type==='d')?'d':issues.some(x=>x.type==='w')?'w':'ok';
-  const headline=priority==='d'?'ต้องให้แพทย์ review ทันที':priority==='w'?'ควรติดตามและสั่งแผนป้องกัน':'ไม่ต้องมี intervention เร่งด่วน';
-  return {priority,headline,issues};
+  return done();
 }
 function actionOutputHtml(i,isReady=false){
   const p=PATIENTS[i];
