@@ -387,7 +387,7 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
   </div>
 
   <div class="sgrid">
-    <div class="panel"><div class="ph"><div class="pt">🤖 AGI Recommendations</div><div style="font-size:10px;color:var(--muted);">รอ Doctor Approve</div></div><div class="pb" id="alertsBox"></div></div>
+    <div class="panel" id="agiRecommendationsPanel"><div class="ph"><div class="pt">🤖 AGI Recommendations</div><div style="font-size:10px;color:var(--muted);">รอ Doctor Approve</div></div><div class="pb" id="alertsBox"></div></div>
     <div style="display:flex;flex-direction:column;gap:10px;">
       <div class="panel">
         <div class="ph"><div class="pt">🛏️ Bed Position</div><div class="ptimer" id="posTimer">1:42:15</div></div>
@@ -687,12 +687,20 @@ function checkAGI(){
   else if(S.urine<.5)alerts.push({t:'w',icon:'💧',title:`Urine Output ${S.urine.toFixed(2)} ml/kg/hr`,desc:'ต่ำกว่า target 0.5 ml/kg/hr · ติดตามต่อเนื่อง',action:null,key:'urinew'});
   if(S.fallRisk)alerts.push({t:'d',icon:'🚨',title:'Bed Exit / Fall Risk Active',desc:'เตียงตรวจพบ pattern การลุกจากเตียงหรือการเคลื่อนตัวผิดปกติ · ต้องให้พยาบาลตรวจทันที',action:'เรียกพยาบาล + เปิด side rail',key:'fall'});
   if((pos==='right'||pos==='left')&&S.posSec>5400)alerts.push({t:'w',icon:'🛏️',title:'แรงกดสะสม — ควรพลิกตัว',desc:`นอน ${posC[pos].lbl} ${Math.floor(S.posSec/60)} นาที · เสี่ยง Pressure Injury Grade I บริเวณกระดูกก้นกบ`,action:'ปรับท่านอน (motor bed)',key:'repos'});
-  if(alerts.length===0)alerts.push({t:'ok-a',icon:'✅',title:'ทุก Parameter อยู่ใน target range',desc:`AGI ตรวจสอบ 12 parameters · Personal baseline tracking active · ไม่พบความผิดปกติ`,action:null,key:'ok'});
   renderAlerts(alerts);updateAGIStatus(alerts);updateRiskScores();
 }
 
 function renderAlerts(alerts){
-  document.getElementById('alertsBox').innerHTML=alerts.map(a=>`
+  const panel=document.getElementById('agiRecommendationsPanel');
+  const box=document.getElementById('alertsBox');
+  if(!box)return;
+  if(alerts.length===0){
+    if(panel)panel.style.display='none';
+    box.innerHTML='';
+    return;
+  }
+  if(panel)panel.style.display='';
+  box.innerHTML=alerts.map(a=>`
     <div class="aitem ${a.t}">
       <div class="aicon">${a.icon}</div>
       <div class="ac">
@@ -874,7 +882,7 @@ function getDoctorActions(p){
   const add=(type,param,why,normal,direction,actions)=>issues.push({type,param,why,normal,direction,actions});
   const done=()=>{
     const priority=issues.some(x=>x.type==='d')?'d':issues.some(x=>x.type==='w')?'w':'ok';
-    const headline=priority==='d'?'ต้องให้แพทย์ review ทันที':priority==='w'?'ควรติดตามและสั่งแผนป้องกัน':'ไม่ต้องมี intervention เร่งด่วน';
+    const headline=priority==='d'?'ต้องให้แพทย์ review ทันที':priority==='w'?'ควรติดตามและสั่งแผนป้องกัน':'';
     return {priority,headline,issues};
   };
   if(p.scenario==='spo2drop'){
@@ -928,7 +936,6 @@ function getDoctorActions(p){
   else if(p.pain>=4)add('w',`Pain ${p.pain}/10`,'ปวดระดับกลาง','เป้าหมาย ≤3/10','ลด pain score',[A('ประเมินตำแหน่งและลักษณะปวด','฿0-150','82%'),A('พิจารณา analgesic non-opioid/PRN','฿80-350','76%'),A('reassess pain score ภายใน 30 นาที','฿0-120','78%')]);
   if(p.fallRisk)add('d','Bed exit sensor','เสี่ยงลุกตกเตียง','เป้าหมาย no unassisted bed exit','ลด fall risk',[A('เรียกพยาบาลเข้า bedside','฿0-120','93%'),A('เปิด side rail และ bed alarm','฿0-120','91%'),A('ประเมิน delirium/toileting need','฿0-450','82%'),A('ย้าย call bell และของจำเป็นให้อยู่ในระยะเอื้อม','฿0-120','86%')]);
   if((p.pos==='right'||p.pos==='left')&&p.posSec>5400)add('w',`Position ${Math.floor(p.posSec/60)} min`,'แรงกดสะสมเกิน threshold','เป้าหมายเปลี่ยนท่าทุก ≤120 นาที','ลด pressure time',[A('สั่งพลิกตัวหรือ pressure relief','฿0-250','88%'),A('ตรวจผิวหนังบริเวณ sacrum/heel','฿0-250','84%'),A('ตั้ง timer รอบถัดไปไม่เกิน 120 นาที','฿0-100','86%'),A('บันทึกตำแหน่งใหม่และ pressure zone หลังพลิกตัว','฿0-120','82%')]);
-  if(!issues.length)add('ok','All parameters','ยังไม่พบค่าผิดปกติ','อยู่ใน target range','คงค่า / monitor',[A('ติดตาม vital signs ตามรอบ','฿0-120','78%'),A('คง personal baseline monitoring','฿0-120','76%'),A('ทบทวนอีกครั้งหากมี alert ใหม่','฿0-120','74%'),A('ยืนยันว่าไม่มี pending doctor approval','฿0-120','72%')]);
   return done();
 }
 function actionOutputHtml(i,isReady=false){
@@ -939,6 +946,7 @@ function actionOutputHtml(i,isReady=false){
     <div class="ao-empty-copy">กด “AGI คำนวณ Action เตียงนี้” เพื่อให้ระบบอ่านค่าผิดปกติของเตียง ${p.bed} แล้วสรุปคำแนะนำสำหรับแพทย์</div>
   </div>`;
   const r=getDoctorActions(p);
+  if(r.priority==='ok'&&!r.issues.length)return'';
   return`<div class="action-output ${r.priority}" id="bedActionOutput">
     <div class="ao-head"><div class="ao-title">AGI Action Output</div><div class="ao-priority">${r.priority==='d'?'CRITICAL':r.priority==='w'?'WATCH':'STABLE'}</div></div>
     <div class="ao-summary">${r.headline}</div>
@@ -954,6 +962,14 @@ function actionOutputHtml(i,isReady=false){
 }
 function renderDetailActionOutput(i){
   const box=document.getElementById('detailActionOutput');if(!box)return;
+  const panel=document.getElementById('detailActionPanel');
+  const r=getDoctorActions(PATIENTS[i]);
+  if(r.priority==='ok'&&!r.issues.length){
+    if(panel)panel.style.display='none';
+    box.innerHTML='';
+    return;
+  }
+  if(panel)panel.style.display='';
   box.innerHTML=actionOutputHtml(i,true);
 }
 function runBedAgi(i){
