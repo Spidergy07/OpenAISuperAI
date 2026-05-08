@@ -19,6 +19,22 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pok 1.5s infinite;}
 @keyframes pok{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
 #clock{font-family:var(--mono);font-size:13px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .2s;}#clock:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.floor-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; padding-top: 20px; }
+.f-bed { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.2s; position: relative; }
+.f-bed:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 24px rgba(0,212,170,0.15); }
+.f-bed.d { border-color: rgba(255,71,87,0.4); background: rgba(255,71,87,0.05); }
+.f-bed.d:hover { box-shadow: 0 8px 24px rgba(255,71,87,0.25); border-color: var(--danger); }
+.f-bed.w { border-color: rgba(255,176,32,0.4); background: rgba(255,176,32,0.05); }
+.f-bed.w:hover { box-shadow: 0 8px 24px rgba(255,176,32,0.25); border-color: var(--warn); }
+.fb-num { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; letter-spacing: 0.1em; }
+.fb-name { font-size: 18px; font-weight: 700; margin-bottom: 14px; }
+.fb-vitals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-family: var(--mono); font-size: 13px; }
+.fb-v { display: flex; justify-content: space-between; background: rgba(0,0,0,0.4); padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); }
+.fb-v span:first-child { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+.fb-al { margin-top: 14px; font-size: 12px; padding: 8px; border-radius: 8px; text-align: center; font-weight: 600; font-family: var(--sans); }
+.fb-al.d { background: rgba(255,71,87,0.15); color: var(--danger); }
+.fb-al.w { background: rgba(255,176,32,0.15); color: var(--warn); }
+.fb-al.ok { background: rgba(46,213,115,0.15); color: var(--ok); }
 .layout{display:grid;grid-template-columns:220px 1fr 270px;min-height:calc(100vh - 53px);}
 .sidebar{border-right:1px solid var(--border);background:var(--bg2);padding:14px 10px;overflow-y:auto;}
 .controls{border-left:1px solid var(--border);background:var(--bg2);padding:14px 14px;overflow-y:auto;}
@@ -173,13 +189,24 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
   </div>
 </header>
 
+<div id="mapView" style="padding: 24px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div style="font-size: 24px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">🗺️ Ward 7B Floor Plan <span style="font-size:12px; padding: 4px 10px; background: rgba(46,213,115,0.1); color: var(--ok); border-radius: 20px; font-weight: 600;">LIVE AGI MONITORING</span></div>
+    <div style="color: var(--muted); font-size: 14px; margin-bottom: 24px;">คลิกที่เตียงผู้ป่วยเพื่อดู Dashboard และแบบจำลองสถานการณ์ต่างๆ (6 Use Cases)</div>
+    <div class="floor-grid" id="floorGrid"></div>
+  </div>
+</div>
+
+<div id="detailView" style="display: none;">
+  <div style="padding: 10px 24px; background: var(--bg2); border-bottom: 1px solid var(--border); display: flex; align-items: center;">
+    <button class="btn btn-deny" onclick="showMap()" style="display:flex; align-items:center; gap:6px; font-size:13px; padding: 8px 16px;"><span>⬅</span> กลับหน้าแผนผัง</button>
+    <span style="margin-left: 16px; font-weight: 600; color: var(--muted);" id="dBedName">Ward 7B</span>
+  </div>
 <div class="layout">
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sl" onclick="toast('รายชื่อผู้ป่วยในความดูแล (กำลังอัปเดต...)','info')">ผู้ป่วยในความดูแล</div>
-  <div class="pcard active warn-c" onclick="switchP(0)"><div class="sdot w"></div><div class="pname">นาย สมชาย ใจดี</div><div class="page">74 ปี · 7B-02</div><div class="pmini"><span class="mv w">HR 92</span><span class="mv ok">SpO₂ 91%</span><span class="mv w">BP 155/92</span></div></div>
-  <div class="pcard danger-c" onclick="switchP(1)"><div class="sdot d"></div><div class="pname">นาง มาลี สวัสดี</div><div class="page">81 ปี · 7B-05</div><div class="pmini"><span class="mv d">HR 118</span><span class="mv d">SpO₂ 87%</span><span class="mv w">38.1°C</span></div></div>
-  <div class="pcard" onclick="switchP(2)"><div class="sdot ok"></div><div class="pname">นาย วิชัย ศรีสุข</div><div class="page">68 ปี · 7B-08</div><div class="pmini"><span class="mv ok">HR 68</span><span class="mv ok">SpO₂ 96%</span><span class="mv ok">BP 128/78</span></div></div>
+  <div class="sl">ผู้ป่วยในความดูแล</div>
+  <div id="sidebarList"></div>
   <div class="sl">สรุปวอร์ด</div>
   <div style="padding:0 4px;font-size:12px;">
     <div style="display:flex;justify-content:space-between;margin-bottom:7px;"><span style="color:var(--muted)">ทั้งหมด</span><span style="font-family:var(--mono);">12</span></div>
@@ -319,6 +346,7 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
   </div>
 </div>
 </div>
+</div> <!-- Close detailView -->
 
 <!-- MODAL -->
 <div class="overlay" id="modal">
@@ -339,9 +367,12 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
 
 <script>
 const PATIENTS = [
-  { name: 'นาย สมชาย ใจดี', hn: '2024-07743', bed: '7B-02', adm: '4 พ.ค. 2026', tags: ['COPD Stage III', 'Hypertension', 'Step-Down ICU', 'Day 8'], hr: 92, spo2: 91, bp: 155, temp: 37.1, rr: 19, pain: 2, news2: 4, braden: 13, sepsis: 'Low' },
-  { name: 'นาง มาลี สวัสดี', hn: '2024-08112', bed: '7B-05', adm: '6 พ.ค. 2026', tags: ['Pneumonia', 'Type 2 Diabetes', 'ICU Step-Down', 'Day 2'], hr: 118, spo2: 87, bp: 142, temp: 38.1, rr: 24, pain: 5, news2: 7, braden: 11, sepsis: 'Medium' },
-  { name: 'นาย วิชัย ศรีสุข', hn: '2024-09221', bed: '7B-08', adm: '7 พ.ค. 2026', tags: ['Post-Op Day 2', 'Stable', 'Ward 7B', 'Day 1'], hr: 68, spo2: 96, bp: 128, temp: 36.6, rr: 16, pain: 1, news2: 1, braden: 18, sepsis: 'Low' }
+  { name: 'นาย สมชาย ใจดี', hn: '2024-07743', bed: '7B-01', adm: '4 พ.ค. 2026', tags: ['Observation', 'Stable'], braden: 18, news2: 0, sepsis: 'Low', scenario: 'stable', st: 'ok', msg: '✅ Normal', hr: 72, spo2: 98, bp: '120/80', temp: 36.8 },
+  { name: 'นาง มาลี สวัสดี', hn: '2024-08112', bed: '7B-02', adm: '6 พ.ค. 2026', tags: ['Infection', 'ICU Step-Down'], braden: 14, news2: 7, sepsis: 'High', scenario: 'sepsis', st: 'd', msg: '🦠 Sepsis Risk', hr: 118, spo2: 91, bp: '92/50', temp: 38.8 },
+  { name: 'นาย วิชัย ศรีสุข', hn: '2024-09221', bed: '7B-03', adm: '7 พ.ค. 2026', tags: ['COPD', 'Oxygen Therapy'], braden: 15, news2: 4, sepsis: 'Low', scenario: 'spo2drop', st: 'd', msg: '😮‍💨 SpO₂ Drop', hr: 96, spo2: 85, bp: '148/90', temp: 37.0 },
+  { name: 'นาง สมหญิง รักดี', hn: '2024-10045', bed: '7B-04', adm: '8 พ.ค. 2026', tags: ['Hypertension', 'Stroke Risk'], braden: 16, news2: 5, sepsis: 'Low', scenario: 'htn', st: 'd', msg: '🩺 HTN Crisis', hr: 82, spo2: 92, bp: '195/110', temp: 37.2 },
+  { name: 'นาย ประเสริฐ ยืนยง', hn: '2024-11234', bed: '7B-05', adm: '1 พ.ค. 2026', tags: ['Immobile', 'Stroke'], braden: 9, news2: 2, sepsis: 'Low', scenario: 'pressure', st: 'w', msg: '⚠️ Position 2h+', hr: 80, spo2: 95, bp: '130/80', temp: 37.1 },
+  { name: 'นางสาว ดวงใจ สุขุม', hn: '2024-12888', bed: '7B-06', adm: '8 พ.ค. 2026', tags: ['Dementia', 'Fall Risk'], braden: 17, news2: 1, sepsis: 'Low', scenario: 'fall', st: 'd', msg: '🚨 Bed Exit Alert', hr: 108, spo2: 93, bp: '145/85', temp: 36.9 }
 ];
 
 let S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false,_h24:true};
@@ -527,14 +558,16 @@ const scenarios={
   sepsis:{hr:118,spo2:91,bp:92,temp:38.8,rr:26,pain:6,msg:'🦠 Sepsis — HR↑ Temp↑ BP↓ RR↑'},
   spo2drop:{hr:96,spo2:85,bp:148,temp:37.0,rr:28,pain:3,msg:'😮‍💨 SpO₂ Drop 85% — COPD exacerbation'},
   htn:{hr:82,spo2:92,bp:195,temp:37.2,rr:18,pain:4,msg:'🩺 Hypertensive Crisis — BP 195 mmHg'},
-  pressure:{hr:80,spo2:91,bp:150,temp:37.1,rr:18,pain:2,posSec:6600,msg:'⚠️ Pressure zone — 2h exceeded'},
+  pressure:{hr:80,spo2:95,bp:130,temp:37.1,rr:18,pain:2,posSec:7300,msg:'⚠️ Pressure zone — 2h exceeded'},
   fall:{hr:108,spo2:93,bp:145,temp:36.9,rr:20,pain:7,msg:'🚨 Bed exit + fall risk + pain spike'},
-  stable:{hr:72,spo2:93,bp:132,temp:36.8,rr:16,pain:1,msg:'✅ All vitals normalized — stable'}
+  stable:{hr:72,spo2:98,bp:120,temp:36.8,rr:16,pain:1,msg:'✅ All vitals normalized — stable'}
 };
+let currentPatient = null;
+
 function scenario(name){
   const sc=scenarios[name];if(!sc)return;
   Object.assign(S,{hr:sc.hr,spo2:sc.spo2,bp:sc.bp,temp:sc.temp,rr:sc.rr,pain:sc.pain});
-  if(sc.posSec)S.posSec=sc.posSec;
+  if(sc.posSec)S.posSec=sc.posSec; else S.posSec=600;
   document.getElementById('sHR').value=sc.hr;
   document.getElementById('sSpo2').value=sc.spo2;
   document.getElementById('sBP').value=sc.bp;
@@ -552,7 +585,7 @@ function scenario(name){
 function openModal(key,icon,title,action){
   S._pa={key,action};
   document.getElementById('mIcon').textContent=icon;
-  document.getElementById('mDetail').innerHTML=`<strong>Action:</strong> ${action}<br><strong>Patient:</strong> นาย สมชาย ใจดี · 74 ปี<br><strong>HR:</strong> ${Math.round(S.hr)} bpm · <strong>SpO₂:</strong> ${S.spo2}% · <strong>BP:</strong> ${S.bp} mmHg · <strong>Temp:</strong> ${S.temp.toFixed(1)}°C<br><strong>Detected by:</strong> AGI personal baseline deviation engine<br><strong>Execution:</strong> Device จะดำเนินการอัตโนมัติหลัง approve`;
+  document.getElementById('mDetail').innerHTML=`<strong>Action:</strong> ${action}<br><strong>Patient:</strong> ${currentPatient?currentPatient.name:''}<br><strong>HR:</strong> ${Math.round(S.hr)} bpm · <strong>SpO₂:</strong> ${S.spo2}% · <strong>BP:</strong> ${S.bp} mmHg · <strong>Temp:</strong> ${S.temp.toFixed(1)}°C<br><strong>Detected by:</strong> AGI personal baseline deviation engine<br><strong>Execution:</strong> Device จะดำเนินการอัตโนมัติหลัง approve`;
   document.getElementById('modal').classList.add('show');
 }
 function closeModal(){document.getElementById('modal').classList.remove('show');}
@@ -584,49 +617,72 @@ function toast(msg,type='ok'){
   setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-// Patient switch
+// Map & Navigation
+function renderMap() {
+  document.getElementById('floorGrid').innerHTML = PATIENTS.map((p, i) => `
+    <div class="f-bed ${p.st}" onclick="openPatient(${i})">
+       <div class="fb-num">เตียง ${p.bed}</div>
+       <div class="fb-name">${p.name}</div>
+       <div class="fb-vitals">
+         <div class="fb-v"><span>HR</span><span class="${p.st==='d'&&p.hr>100?'d':''}">${p.hr}</span></div>
+         <div class="fb-v"><span>SpO₂</span><span class="${p.spo2<90?'d':''}">${p.spo2}%</span></div>
+         <div class="fb-v"><span>BP</span><span class="${p.scenario==='htn'||p.scenario==='sepsis'?'d':''}">${p.bp}</span></div>
+         <div class="fb-v"><span>Temp</span><span class="${p.temp>38?'d':''}">${p.temp}°C</span></div>
+       </div>
+       <div class="fb-al ${p.st}">${p.msg}</div>
+    </div>
+  `).join('');
+  
+  document.getElementById('sidebarList').innerHTML = PATIENTS.map((p, i) => `
+    <div class="pcard ${p.st==='d'?'danger-c':p.st==='w'?'warn-c':''}" id="sb_p_${i}" onclick="switchP(${i})">
+       <div class="sdot ${p.st}"></div>
+       <div class="pname">${p.name}</div>
+       <div class="page">${p.bed}</div>
+       <div class="pmini"><span class="mv ${p.st==='d'&&p.hr>100?'d':''}">HR ${p.hr}</span><span class="mv ${p.spo2<90?'d':''}">SpO₂ ${p.spo2}%</span></div>
+    </div>
+  `).join('');
+}
+
+function openPatient(i) {
+  document.getElementById('mapView').style.display = 'none';
+  document.getElementById('detailView').style.display = 'block';
+  document.getElementById('dBedName').textContent = `กำลังดูข้อมูล: เตียง ${PATIENTS[i].bed}`;
+  switchP(i);
+  window.scrollTo(0,0);
+}
+
+function showMap() {
+  document.getElementById('detailView').style.display = 'none';
+  document.getElementById('mapView').style.display = 'block';
+  renderMap(); // Refresh map states if they changed
+}
+
 function switchP(i){
   const p = PATIENTS[i];
   if(!p) return;
+  currentPatient = p;
 
-  // Update UI Cards
   document.querySelectorAll('.pcard').forEach((c,j)=>c.classList.toggle('active',i===j));
   
-  // Update Header Info
   document.querySelector('.phead h1').textContent = p.name;
   document.querySelector('.phead div[style*="color:var(--muted)"]').textContent = `HN: ${p.hn} · เข้ารักษา ${p.adm} · เตียง ${p.bed}`;
   
-  // Update Tags
   const tagBox = document.querySelector('.tags');
   tagBox.innerHTML = p.tags.map((t, idx) => {
     let cls = 'tag-day';
     if(idx === 0) cls = 'tag-dx';
-    if(t.includes('ICU') || t.includes('Ward')) cls = 'tag-ward';
+    if(t.includes('ICU') || t.includes('Ward') || t.includes('Stable') || t.includes('Risk') || t.includes('Therapy')) cls = 'tag-ward';
     return `<span class="tag ${cls}">${t}</span>`;
   }).join('');
 
-  // Update State & Vitals
-  S.hr = p.hr; S.spo2 = p.spo2; S.bp = p.bp; S.temp = p.temp; S.rr = p.rr; S.pain = p.pain;
-  
-  // Update Sliders
-  document.getElementById('sHR').value = S.hr;
-  document.getElementById('sSpo2').value = S.spo2;
-  document.getElementById('sBP').value = S.bp;
-  document.getElementById('sTemp').value = Math.round(S.temp*10);
-  document.getElementById('sRR').value = S.rr;
-  document.getElementById('sPain').value = S.pain;
-
-  // Render All Vitals
-  ['hr','spo2','bp','temp','rr','pain'].forEach(k => renderVital(k, S[k]));
-  document.getElementById('ecgHR').textContent = `${Math.round(S.hr)} bpm`;
-
-  // Update Risk Scores (News2, Braden, Sepsis display)
   document.getElementById('bradenScore').textContent = p.braden;
   document.getElementById('news2Score').textContent = p.news2;
   document.getElementById('sepsisRs').textContent = p.sepsis;
+  document.getElementById('news2Rb').className=`rb ${p.news2>=5?'hi':p.news2>=3?'med':'low'}`;
+  document.getElementById('sepsisRb').className=`rb ${p.sepsis==='High'?'hi':p.sepsis==='Med'?'med':'low'}`;
+  document.getElementById('bradenRb').className=`rb ${p.braden<=12?'hi':p.braden<=14?'med':'low'}`;
   
-  checkAGI();
-  toast(`กำลังโหลดข้อมูล: ${p.name}`, i===1 ? 'warn' : 'ok');
+  scenario(p.scenario);
 }
 
 function toggleClock(){
@@ -640,7 +696,7 @@ setInterval(()=>{
   document.getElementById('clock').textContent=n.toLocaleTimeString('th-TH',opt);
 },1000);
 
-checkAGI();
+renderMap();
 </script>
 </body>
 </html>
