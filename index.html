@@ -10,20 +10,20 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:rgba(8,12,18,0.97);backdrop-filter:blur(12px);position:sticky;top:0;z-index:200;}
-.logo{display:flex;align-items:center;gap:10px;}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;transition:opacity .2s;}.logo:hover{opacity:.8;}
 .logo-icon{width:30px;height:30px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
 .logo-text{font-size:17px;font-weight:700;letter-spacing:-.5px;}
 .logo-text span{color:var(--accent);}
 .hdr-right{display:flex;gap:16px;align-items:center;}
-.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);}
+.live-badge{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ok);cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .2s;}.live-badge:hover{background:rgba(46,213,115,.1);}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pok 1.5s infinite;}
 @keyframes pok{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.4;transform:scale(1.4);}}
-#clock{font-family:var(--mono);font-size:13px;color:var(--muted);}
+#clock{font-family:var(--mono);font-size:13px;color:var(--muted);cursor:pointer;padding:4px 8px;border-radius:6px;transition:background .2s;}#clock:hover{background:rgba(255,255,255,.05);color:var(--text);}
 .layout{display:grid;grid-template-columns:220px 1fr 270px;min-height:calc(100vh - 53px);}
 .sidebar{border-right:1px solid var(--border);background:var(--bg2);padding:14px 10px;overflow-y:auto;}
 .controls{border-left:1px solid var(--border);background:var(--bg2);padding:14px 14px;overflow-y:auto;}
 .main{padding:16px 20px;overflow-y:auto;background:var(--bg);}
-.sl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 6px;margin:14px 0 6px;}
+.sl{font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:0 6px;margin:14px 0 6px;cursor:pointer;transition:color .2s;}.sl:hover{color:var(--accent);}
 .sl:first-child{margin-top:0;}
 .pcard{padding:9px 10px;border-radius:10px;cursor:pointer;border:1.5px solid transparent;margin-bottom:5px;transition:all .2s;position:relative;}
 .pcard:hover{background:var(--bg3);border-color:var(--border2);}
@@ -165,18 +165,18 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
 </head>
 <body>
 <header>
-  <div class="logo"><div class="logo-icon">🧠</div><div class="logo-text">AGI <span>BedCare</span></div></div>
+  <div class="logo" onclick="location.reload()"><div class="logo-icon">🧠</div><div class="logo-text">AGI <span>BedCare</span></div></div>
   <div class="hdr-right">
-    <div class="live-badge"><div class="live-dot"></div>LIVE</div>
-    <div id="clock">--:--:--</div>
-    <div style="font-size:11px;color:var(--muted);padding:3px 9px;border:1px solid var(--border);border-radius:5px;">Ward 7B · ICU Step-Down</div>
+    <div class="live-badge" onclick="toast('System Status: All systems operational','ok')"><div class="live-dot"></div>LIVE</div>
+    <div id="clock" onclick="toggleClock()">--:--:--</div>
+    <div style="font-size:11px;color:var(--muted);padding:3px 9px;border:1px solid var(--border);border-radius:5px;cursor:pointer;" onclick="toast('Ward 7B Summary: 12 Patients, 1 Critical','info')">Ward 7B · ICU Step-Down</div>
   </div>
 </header>
 
 <div class="layout">
 <!-- SIDEBAR -->
 <div class="sidebar">
-  <div class="sl">ผู้ป่วยในความดูแล</div>
+  <div class="sl" onclick="toast('รายชื่อผู้ป่วยในความดูแล (กำลังอัปเดต...)','info')">ผู้ป่วยในความดูแล</div>
   <div class="pcard active warn-c" onclick="switchP(0)"><div class="sdot w"></div><div class="pname">นาย สมชาย ใจดี</div><div class="page">74 ปี · 7B-02</div><div class="pmini"><span class="mv w">HR 92</span><span class="mv ok">SpO₂ 91%</span><span class="mv w">BP 155/92</span></div></div>
   <div class="pcard danger-c" onclick="switchP(1)"><div class="sdot d"></div><div class="pname">นาง มาลี สวัสดี</div><div class="page">81 ปี · 7B-05</div><div class="pmini"><span class="mv d">HR 118</span><span class="mv d">SpO₂ 87%</span><span class="mv w">38.1°C</span></div></div>
   <div class="pcard" onclick="switchP(2)"><div class="sdot ok"></div><div class="pname">นาย วิชัย ศรีสุข</div><div class="page">68 ปี · 7B-08</div><div class="pmini"><span class="mv ok">HR 68</span><span class="mv ok">SpO₂ 96%</span><span class="mv ok">BP 128/78</span></div></div>
@@ -338,11 +338,11 @@ input[type=range].danger-s::-webkit-slider-thumb{background:var(--danger);}
 <div class="toast" id="toast"><span id="toastText">Done</span></div>
 
 <script>
-const S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false};
+const S={hr:92,spo2:91,bp:155,temp:37.1,rr:19,pain:2,pos:'right',angle:25,posSec:6135,_pa:null,_pressAlerted:false,_h24:true};
 const BL={hr:68,spo2:90,bp:150,temp:36.6,rr:20};
 
-// Clock
-setInterval(()=>{const n=new Date();document.getElementById('clock').textContent=n.toLocaleTimeString('th-TH',{hour12:false});},1000);
+// Clock (removed old interval here)
+
 
 // Pos Timer
 setInterval(()=>{
@@ -584,6 +584,17 @@ function switchP(i){
   const msgs=['เปิดข้อมูล นาย สมชาย ใจดี','⚠ นาง มาลี — SpO₂ 87% Critical!','เปิดข้อมูล นาย วิชัย ศรีสุข'];
   toast(msgs[i],i===1?'warn':'ok');
 }
+
+function toggleClock(){
+  S._h24 = !S._h24;
+  toast(`Format: ${S._h24?'24h':'12h'}`,'info');
+}
+
+setInterval(()=>{
+  const n=new Date();
+  const opt = S._h24 ? {hour12:false} : {hour12:true, hour:'numeric', minute:'2-digit', second:'2-digit'};
+  document.getElementById('clock').textContent=n.toLocaleTimeString('th-TH',opt);
+},1000);
 
 checkAGI();
 </script>
